@@ -1,6 +1,6 @@
 use std::iter::FromIterator;
 
-fn fixed_xor(hex1: &str, hex2: &str) -> Result<String, &'static str> {
+pub fn fixed_xor(hex1: &str, hex2: &str) -> Result<String, &'static str> {
     if hex1.len() != hex2.len() {
         return Err("two hex string should have the same length");
     }

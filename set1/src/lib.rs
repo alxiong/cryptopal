@@ -1,3 +1,3 @@
 #![allow(dead_code)]
-mod base64;
-mod xor;
+pub mod base64;
+pub mod xor;

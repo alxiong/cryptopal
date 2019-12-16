@@ -2,11 +2,13 @@
 use std::collections::HashMap;
 use std::{fs, io, str};
 mod base64;
+mod vigenere;
 mod xor;
 
 fn main() {
-    chal_3();
-    chal_4();
+    // chal_3();
+    // chal_4();
+    chal_6();
 }
 fn chal_3() {
     println!("Challenge 3: Single-byte XOR Cipher");
@@ -21,8 +23,17 @@ fn chal_3() {
 }
 fn chal_4() {
     println!("Challenge 4: Detect single-character XOR");
-    single_xor_detect().unwrap();
-    println!("Decrypted in set1/data/chal4_solution.txt");
+    let ciphertext_hex = fs::read_to_string("data/chal4.txt").unwrap();
+    println!(
+        "Decrypted msg is: {}",
+        single_xor_detect(&ciphertext_hex).unwrap()
+    );
+    println!("===================================");
+}
+fn chal_6() {
+    println!("CHallenge 6: Break repeating-key XOR");
+    let ct_base64: String = fs::read_to_string("data/chal6.txt").unwrap();
+    break_repeating_xor(&ct_base64);
     println!("===================================");
 }
 
@@ -48,11 +59,10 @@ fn single_byte_xor_decipher(cipertext: &str, freq_letter_used: usize) -> String 
     String::from_utf8(decrypted_bytes).unwrap_or_default()
 }
 
-fn single_xor_detect() -> io::Result<()> {
-    let cipher_hex_str = fs::read_to_string("data/chal4.txt").unwrap();
+fn single_xor_detect(ciphertext: &str) -> io::Result<String> {
     let mut decrypted_str = String::new();
 
-    for line in cipher_hex_str.lines() {
+    for line in ciphertext.lines() {
         let decrypted_line = single_byte_xor_decipher(line, 0);
         if !decrypted_line.is_empty()
             && decrypted_line
@@ -63,6 +73,14 @@ fn single_xor_detect() -> io::Result<()> {
             decrypted_str.push('\n');
         }
     }
-    fs::write("data/chal4_solution.txt", decrypted_str)?;
-    Ok(())
+    Ok(decrypted_str)
+}
+
+fn break_repeating_xor(ct: &str) {
+    let ct_base64: String = ct.lines().collect();
+    let key_size = vigenere::key_size(&ct_base64);
+    let transposed_block: Vec<_> =
+        vigenere::transpose_block(vigenere::into_block_lossy(&ct_base64, key_size));
+
+    println!("{}", key_size);
 }

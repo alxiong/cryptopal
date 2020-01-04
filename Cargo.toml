@@ -1,5 +1,7 @@
 [workspace]
 
 members = [
-    "set1"
+    # "challenges",
+    "encoding",
+    # "xor"
 ]

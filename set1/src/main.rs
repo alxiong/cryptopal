@@ -7,8 +7,8 @@ mod xor;
 
 fn main() {
     // chal_3();
-    // chal_4();
-    chal_6();
+    chal_4();
+    // chal_6();
 }
 fn chal_3() {
     println!("Challenge 3: Single-byte XOR Cipher");
@@ -70,7 +70,6 @@ fn single_xor_detect(ciphertext: &str) -> io::Result<String> {
                 .all(|c| c.is_alphanumeric() || c.is_whitespace())
         {
             decrypted_str.push_str(&decrypted_line);
-            decrypted_str.push('\n');
         }
     }
     Ok(decrypted_str)
@@ -78,7 +77,8 @@ fn single_xor_detect(ciphertext: &str) -> io::Result<String> {
 
 fn break_repeating_xor(ct: &str) {
     let ct_base64: String = ct.lines().collect();
-    let key_size = vigenere::key_size(&ct_base64);
+    let ct_hex: String = base64::base64_to_hex(&ct_base64).unwrap();
+    let key_size = vigenere::key_size(&ct_hex);
     let transposed_block: Vec<_> =
         vigenere::transpose_block(vigenere::into_block_lossy(&ct_base64, key_size));
 

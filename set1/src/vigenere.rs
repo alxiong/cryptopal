@@ -75,7 +75,7 @@ pub fn transpose_block(block: Vec<String>) -> Vec<String> {
 }
 
 #[cfg(test)]
-mod tests {
+mod vigenere_tests {
     use super::*;
 
     #[test]

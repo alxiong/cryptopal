@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 use std::char;
+use std::collections::HashMap;
 
 pub fn hex_to_bytes(hex: &str) -> Result<Vec<u8>, &str> {
     let chars: Vec<char> = hex.chars().collect();
@@ -34,7 +35,7 @@ pub fn bytes_to_hex(bytes: &Vec<u8>) -> String {
 
 fn bytes_to_base64(b: Vec<u8>) -> String {
     let mut b64 = String::from(""); // if b.len() == 0, should return Ok("")
-    let table: Vec<char> = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
+    let table: Vec<char> = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
         .chars()
         .collect();
     for chunk in b.chunks_exact(3) {
@@ -71,13 +72,57 @@ fn bytes_to_base64(b: Vec<u8>) -> String {
 
     b64
 }
-fn hex_to_base64(hex: &str) -> Result<String, &str> {
+
+fn base64_to_bytes(base64: &str) -> Result<Vec<u8>, &str> {
+    if base64.len() % 4 != 0 {
+        return Err("invalid base64 encoded string");
+    }
+
+    let mut table: HashMap<char, u8> = HashMap::new();
+    let freq_vec: Vec<char> = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+        .chars()
+        .collect();
+    for (i, c) in freq_vec.iter().enumerate() {
+        table.insert(*c, i as u8);
+    }
+
+    let sextets: Vec<_> = base64
+        .chars()
+        .filter(|&c| c != '=')
+        .map(|c| table.get(&c).unwrap())
+        .collect();
+    println!("sextets: {:?}", sextets);
+
+    let result: Vec<_> = sextets[..]
+        .chunks(4)
+        .map(|chunk| {
+            let first_octet = (chunk[0] << 2) + (chunk[1] >> 4 & 0x3 as u8);
+            if chunk.len() > 2 {
+                let second_octet = ((chunk[1] & 0xf) << 4) + (chunk[2] >> 2 & 0xf as u8);
+                if chunk.len() > 3 {
+                    let third_octet = ((chunk[2] & 0x3) << 6) + (chunk[3] & 0x3f);
+                    return [first_octet, second_octet, third_octet].to_vec();
+                }
+                return [first_octet, second_octet].to_vec();
+            }
+            [first_octet].to_vec()
+        })
+        .collect();
+    Ok(result.into_iter().flatten().collect::<Vec<_>>())
+}
+
+pub fn hex_to_base64(hex: &str) -> Result<String, &str> {
     let b = hex_to_bytes(hex)?;
     Ok(bytes_to_base64(b))
 }
 
+pub fn base64_to_hex(base64: &str) -> Result<String, &str> {
+    let bytes = base64_to_bytes(&base64)?;
+    Ok(bytes_to_hex(&bytes))
+}
+
 #[cfg(test)]
-mod tests {
+mod base64_tests {
     use super::*;
 
     #[test]
@@ -94,6 +139,14 @@ mod tests {
         assert_eq!(
             hex_to_base64("49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d"),
             Ok(String::from("SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t"))
+        );
+    }
+
+    #[test]
+    fn test_base64_to_hex() {
+        assert_eq!(
+            base64_to_hex("Jk8DCkkcC3hFMQIEC0EbAVIqCFZBO1IdBgZUVA4QTgUWSR4QJwwRTWM="),
+            Ok(String::from("264f030a491c0b78453102040b411b01522a0856413b521d060654540e104e0516491e10270c114d63")),
         );
     }
 

@@ -44,7 +44,7 @@ pub fn repeating_xor(msg: &str, key: &str) -> String {
 }
 
 #[cfg(test)]
-mod tests {
+mod xor_tests {
     use super::*;
 
     #[test]

@@ -1,3 +1,3 @@
 fn main() {
-    println!("chal6");
+    println!("🔓 Challenge 6");
 }

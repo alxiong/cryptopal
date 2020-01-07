@@ -1,18 +1,13 @@
 [package]
-name = "challenges"
+name = "cryptanalysis"
 version = "0.1.0"
 authors = ["Alex Xiong <alex.xiong.tech@gmail.com>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dependencies]
-
 [dependencies.xor]
-path = "../xor"
+path = '../xor'
 
 [dependencies.encoding]
-path = "../encoding"
-
-[dependencies.cryptanalysis]
-path = "../cryptanalysis"
+path = '../encoding'

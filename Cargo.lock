@@ -6,10 +6,35 @@ version = "1.0.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
+name = "challenges"
+version = "0.1.0"
+dependencies = [
+ "cryptanalysis 0.1.0",
+ "encoding 0.1.0",
+ "xor 0.1.0",
+]
+
+[[package]]
+name = "cryptanalysis"
+version = "0.1.0"
+dependencies = [
+ "encoding 0.1.0",
+ "xor 0.1.0",
+]
+
+[[package]]
 name = "encoding"
 version = "0.1.0"
 dependencies = [
  "anyhow 1.0.26 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "xor"
+version = "0.1.0"
+dependencies = [
+ "anyhow 1.0.26 (registry+https://github.com/rust-lang/crates.io-index)",
+ "encoding 0.1.0",
 ]
 
 [metadata]

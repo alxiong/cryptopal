@@ -37,6 +37,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "cipher"
+version = "0.1.0"
+
+[[package]]
 name = "cryptanalysis"
 version = "0.1.0"
 dependencies = [

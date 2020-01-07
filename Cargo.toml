@@ -4,5 +4,6 @@ members = [
     "challenges",
     "encoding",
     "xor",
-    "cryptanalysis"
+    "cryptanalysis",
+    "cipher"
 ]

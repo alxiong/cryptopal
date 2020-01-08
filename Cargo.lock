@@ -29,6 +29,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "challenges"
 version = "0.1.0"
 dependencies = [
+ "cipher 0.1.0",
  "cryptanalysis 0.1.0",
  "encoding 0.1.0",
  "openssl 0.10.26 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -39,6 +40,11 @@ dependencies = [
 [[package]]
 name = "cipher"
 version = "0.1.0"
+dependencies = [
+ "openssl 0.10.26 (registry+https://github.com/rust-lang/crates.io-index)",
+ "openssl-sys 0.9.53 (registry+https://github.com/rust-lang/crates.io-index)",
+ "xor 0.1.0",
+]
 
 [[package]]
 name = "cryptanalysis"

@@ -10,3 +10,6 @@
 # replace 1 with any number
 cargo run --bin chal1
 ```
+
+❓ If you have a better solution, or wants clarification/comment of my code, I'd
+be grateful if you open an issue

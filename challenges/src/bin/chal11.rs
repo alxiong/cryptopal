@@ -1,5 +1,6 @@
+use challenges::random_bytes;
 use cipher::Mode;
-use rand::{self, Rng, RngCore};
+use rand::{self, Rng};
 
 fn main() {
     println!("🔓 Challenge 11");
@@ -24,12 +25,6 @@ fn detect_ecb_or_cbc() -> Mode {
     } else {
         Mode::CBC
     }
-}
-
-fn random_bytes(size: u32) -> Vec<u8> {
-    let mut bytes = vec![0 as u8; size as usize];
-    rand::thread_rng().fill_bytes(&mut bytes[..]);
-    bytes
 }
 
 fn encryption_oracle(input: &[u8]) -> Vec<u8> {

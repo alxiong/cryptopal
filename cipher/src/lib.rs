@@ -1,5 +1,6 @@
 pub mod cbc;
 pub mod ecb;
+pub mod padding;
 
 #[derive(Debug)]
 pub enum Mode {

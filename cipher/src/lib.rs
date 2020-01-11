@@ -45,10 +45,10 @@ mod tests {
         assert_eq!(
             into_blocks("helloworld".as_bytes(), 3),
             vec![
-                "hel".as_bytes().to_vec(),
-                "low".as_bytes().to_vec(),
-                "orl".as_bytes().to_vec(),
-                "d".as_bytes().to_vec()
+                "hel".as_bytes(),
+                "low".as_bytes(),
+                "orl".as_bytes(),
+                "d".as_bytes()
             ]
         );
     }
@@ -57,12 +57,12 @@ mod tests {
     fn test_from_blocks() {
         assert_eq!(
             from_blocks(&vec![
-                "hel".as_bytes().to_vec(),
-                "low".as_bytes().to_vec(),
-                "orl".as_bytes().to_vec(),
-                "d".as_bytes().to_vec()
+                "hel".as_bytes(),
+                "low".as_bytes(),
+                "orl".as_bytes(),
+                "d".as_bytes()
             ]),
-            "helloworld".as_bytes().to_vec()
+            "helloworld".as_bytes()
         );
     }
 }

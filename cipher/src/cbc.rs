@@ -103,12 +103,10 @@ mod tests {
     #[test]
     fn cbc_correctness() {
         let cipher = AES_128_CBC::new(&[0 as u8; 16]);
-        let msg1 = "Privacy".as_bytes().to_vec();
-        let msg2 = "Privacy is necessary".as_bytes().to_vec();
-        let msg3 = "Privacy is necessary for an open society in the electronic age"
-            .as_bytes()
-            .to_vec();
-        let key = "i am pied piper!".as_bytes().to_vec();
+        let msg1 = "Privacy".as_bytes();
+        let msg2 = "Privacy is necessary".as_bytes();
+        let msg3 = "Privacy is necessary for an open society in the electronic age".as_bytes();
+        let key = "i am pied piper!".as_bytes();
 
         // test encrypt is correctly implemented by comparing to the ciphertext produced by the OpenSSL lib
         assert_eq!(

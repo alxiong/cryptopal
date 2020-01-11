@@ -57,7 +57,7 @@ fn forge_admin() {
 
     // Declare a new self-made admin
     println!(
-        "Let's welcome the self-made admin: \n 🤴\n{:?}",
+        "Let's welcome the self-made admin: \n 🤴\n{:#?}",
         decrypt_profile(&key, forged_ct).unwrap()
     );
 }

@@ -10,7 +10,7 @@ fn main() {
         .lines()
         .collect();
     let ct_bytes = Base64::from_str(&ct_base64).unwrap().as_bytes();
-    let key = "YELLOW SUBMARINE".as_bytes().to_vec();
+    let key = "YELLOW SUBMARINE".as_bytes();
 
     let pt = cipher.decrypt(&key, &ct_bytes);
     println!("decrypted message: \n{:?}", String::from_utf8(pt).unwrap());

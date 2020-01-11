@@ -26,12 +26,10 @@ mod tests {
     use super::*;
     #[test]
     fn ecb_correctness() {
-        let msg1 = "Privacy".as_bytes().to_vec();
-        let msg2 = "Privacy is necessary".as_bytes().to_vec();
-        let msg3 = "Privacy is necessary for an open society in the electronic age"
-            .as_bytes()
-            .to_vec();
-        let key = "i am pied piper!".as_bytes().to_vec();
+        let msg1 = "Privacy".as_bytes();
+        let msg2 = "Privacy is necessary".as_bytes();
+        let msg3 = "Privacy is necessary for an open society in the electronic age".as_bytes();
+        let key = "i am pied piper!".as_bytes();
         let cipher = AES_128_ECB::new();
         assert_eq!(cipher.decrypt(&key, &cipher.encrypt(&key, &msg1)), msg1);
         assert_eq!(cipher.decrypt(&key, &cipher.encrypt(&key, &msg2)), msg2);

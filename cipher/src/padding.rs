@@ -32,7 +32,6 @@ pub fn add(blocks: &mut Vec<Vec<u8>>, size: u8) -> Result<(), PaddingError> {
     } else {
         if let Some(last_block) = blocks.last_mut() {
             let padding_len: u8 = size - last_block.len() as u8;
-            println!("padding_len: {}", padding_len);
             last_block.append(&mut vec![padding_len; padding_len as usize]);
         }
     }

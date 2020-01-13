@@ -1,4 +1,5 @@
 pub mod cbc;
+pub mod ctr;
 pub mod ecb;
 pub mod padding;
 
@@ -8,6 +9,7 @@ use rand;
 pub enum Mode {
     ECB,
     CBC,
+    CTR,
 }
 
 /// Represents a cipher
@@ -21,6 +23,7 @@ pub fn new(mode: Mode) -> Box<dyn Cipher> {
     match mode {
         Mode::CBC => Box::from(cbc::AES_128_CBC::new()),
         Mode::ECB => Box::from(ecb::AES_128_ECB::new()),
+        Mode::CTR => Box::from(ctr::AES_128_CTR::new()),
     }
 }
 

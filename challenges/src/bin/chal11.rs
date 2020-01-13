@@ -40,12 +40,12 @@ fn encryption_oracle(input: &[u8]) -> Vec<u8> {
 
     // encrypt the padded_input with one of ECB and CBC, chosen at random
     if rand::random::<bool>() {
-        let ecb_cipher = cipher::new(Mode::ECB, None);
+        let ecb_cipher = cipher::new(Mode::ECB);
         let ct = ecb_cipher.encrypt(&random_bytes(16)[..], &padded_input);
         println!("Using ECB, shhh 🤫");
         ct
     } else {
-        let cbc_cipher = cipher::new(Mode::CBC, Some(&[random_bytes(1)[0]; 16]));
+        let cbc_cipher = cipher::new(Mode::CBC);
         let ct = cbc_cipher.encrypt(&random_bytes(16)[..], &padded_input);
         println!("Using CBC, shhh 🤫");
         ct

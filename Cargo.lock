@@ -54,6 +54,7 @@ version = "0.1.0"
 dependencies = [
  "openssl 0.10.26 (registry+https://github.com/rust-lang/crates.io-index)",
  "openssl-sys 0.9.53 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rand 0.7.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "xor 0.1.0",
 ]
 

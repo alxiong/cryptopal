@@ -19,7 +19,7 @@ fn break_ecb_harder(key: &Key) {
 
     // break ECB one byte at a time, starting from the last byte
     let mut deciphered: Vec<u8> = Vec::with_capacity(unknown_len);
-    for i in 0..unknown_len + 1 {
+    for i in 0..unknown_len {
         let target_suffix_len = 16 - deciphered.len() % 16 - 1;
         let target_prefix_len: u32 = (i as i32 + 1 - unknown_len as i32)
             .rem_euclid(16i32)
@@ -93,8 +93,8 @@ YnkK"
         actual_input.extend_from_slice(&input);
         actual_input.extend_from_slice(&unknown_base64.as_bytes()[..]);
 
-        let ecb_cipher = cipher::new(Mode::ECB, None);
-        ecb_cipher.encrypt(&self.0, &actual_input)
+        let ecb_cipher = cipher::new(Mode::ECB);
+        ecb_cipher.encrypt(&self.0, &actual_input).split_off(16)
     }
 }
 

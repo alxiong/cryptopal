@@ -2,6 +2,8 @@ pub mod cbc;
 pub mod ecb;
 pub mod padding;
 
+use rand;
+
 #[derive(Debug)]
 pub enum Mode {
     ECB,
@@ -15,9 +17,9 @@ pub trait Cipher {
 }
 
 /// Instantiate a new cipher provided a specific mode and optional initialization vector
-pub fn new(mode: Mode, iv: Option<&[u8; 16]>) -> Box<dyn Cipher> {
+pub fn new(mode: Mode) -> Box<dyn Cipher> {
     match mode {
-        Mode::CBC => Box::from(cbc::AES_128_CBC::new(iv.unwrap())),
+        Mode::CBC => Box::from(cbc::AES_128_CBC::new()),
         Mode::ECB => Box::from(ecb::AES_128_ECB::new()),
     }
 }
@@ -34,6 +36,12 @@ pub fn into_blocks(s: &[u8], size: usize) -> Vec<Vec<u8>> {
 /// Inverse transformation of `into_blocks`
 pub fn from_blocks(blocks: &Vec<Vec<u8>>) -> Vec<u8> {
     blocks.clone().into_iter().flatten().collect::<Vec<_>>()
+}
+
+pub fn random_bytes_array(arr: &mut [u8]) {
+    for i in 0..arr.len() {
+        arr[i] = rand::random::<u8>();
+    }
 }
 
 #[cfg(test)]
@@ -57,10 +65,10 @@ mod tests {
     fn test_from_blocks() {
         assert_eq!(
             from_blocks(&vec![
-                "hel".as_bytes(),
-                "low".as_bytes(),
-                "orl".as_bytes(),
-                "d".as_bytes()
+                b"hel".to_vec(),
+                b"low".to_vec(),
+                b"orl".to_vec(),
+                b"d".to_vec(),
             ]),
             "helloworld".as_bytes()
         );

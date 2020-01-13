@@ -74,7 +74,7 @@ YnkK"
         actual_input.extend_from_slice(&input);
         actual_input.extend_from_slice(&unknown_base64.as_bytes()[..]);
 
-        let ecb_cipher = cipher::new(Mode::ECB, None);
+        let ecb_cipher = cipher::new(Mode::ECB);
         ecb_cipher.encrypt(&self.0, &actual_input)
     }
 }

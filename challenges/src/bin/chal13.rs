@@ -68,12 +68,12 @@ fn profile_for(email: &str) -> String {
 }
 
 fn encrypt_profile(key: &[u8], profile: &Profile) -> Vec<u8> {
-    let ecb_cipher = cipher::new(Mode::ECB, Some(&[0 as u8; 16]));
+    let ecb_cipher = cipher::new(Mode::ECB);
     ecb_cipher.encrypt(&key, &profile.to_query_str().as_bytes())
 }
 
 fn decrypt_profile(key: &[u8], ct: Vec<u8>) -> Result<Profile> {
-    let ecb_cipher = cipher::new(Mode::ECB, Some(&[0 as u8; 16]));
+    let ecb_cipher = cipher::new(Mode::ECB);
     let profile = ecb_cipher.decrypt(&key, &ct);
     Profile::from_query_str(&String::from_utf8(profile).unwrap())
 }

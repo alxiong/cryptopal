@@ -36,6 +36,33 @@ impl AES_128_CBC {
             panic!("failed to remove padding, internal bug");
         }
     }
+
+    /// return plaintext with padding
+    pub fn decrypt_with_padding(key: &[u8], ct: &[u8]) -> Vec<u8> {
+        // format ciphertext to 2D vector
+        let mut iv_ct_blocks = into_blocks(&ct, 16);
+        Self::validate_block(&iv_ct_blocks);
+        let ct_blocks = iv_ct_blocks.split_off(1); // chop off the first 16-byte iv
+
+        // CBC decrypt
+        let mut pt: Vec<Vec<u8>> = vec![Vec::new(); ct_blocks.len()];
+        let mut last = &iv_ct_blocks[0];
+        let mut decrypter =
+            SslCrypter::new(SslCipher::aes_128_ecb(), Mode::Decrypt, key, None).unwrap();
+        decrypter.pad(false); // disable padding from aes_128_ecb
+
+        for i in 0..(*ct_blocks).len() {
+            pt[i] = vec![0; 32];
+            let mut count = decrypter.update(&ct_blocks[i], &mut pt[i]).unwrap();
+            count += decrypter.finalize(&mut pt[i][count..]).unwrap();
+            pt[i].truncate(count);
+            pt[i] = xor::xor(&last, &pt[i]).unwrap();
+
+            last = &ct_blocks[i];
+        }
+
+        from_blocks(&pt)
+    }
 }
 
 impl Cipher for AES_128_CBC {
@@ -70,31 +97,11 @@ impl Cipher for AES_128_CBC {
     }
 
     fn decrypt(&self, key: &[u8], ct: &[u8]) -> Vec<u8> {
-        // format ciphertext to 2D vector
-        let mut iv_ct_blocks = into_blocks(&ct, 16);
-        Self::validate_block(&iv_ct_blocks);
-        let ct_blocks = iv_ct_blocks.split_off(1); // chop off the first 16-byte iv
-
-        // CBC decrypt
-        let mut pt: Vec<Vec<u8>> = vec![Vec::new(); ct_blocks.len()];
-        let mut last = &iv_ct_blocks[0];
-        let mut decrypter =
-            SslCrypter::new(SslCipher::aes_128_ecb(), Mode::Decrypt, key, None).unwrap();
-        decrypter.pad(false); // disable padding from aes_128_ecb
-
-        for i in 0..(*ct_blocks).len() {
-            pt[i] = vec![0; 32];
-            let mut count = decrypter.update(&ct_blocks[i], &mut pt[i]).unwrap();
-            count += decrypter.finalize(&mut pt[i][count..]).unwrap();
-            pt[i].truncate(count);
-            pt[i] = xor::xor(&last, &pt[i]).unwrap();
-
-            last = &ct_blocks[i];
-        }
-
+        let pt = Self::decrypt_with_padding(&key, &ct);
+        let mut pt_2d = into_blocks(&pt, 16);
         // remove padding
-        Self::remove_padding(&mut pt);
-        from_blocks(&pt)
+        Self::remove_padding(&mut pt_2d);
+        from_blocks(&pt_2d)
     }
 }
 

@@ -1,10 +1,10 @@
-use crate::freq_analysis;
+use super::{freq_analysis, transpose_block};
 use std::collections::HashMap;
 
 pub fn extract_key(ct: &[u8]) -> Vec<u8> {
     let mut key: Vec<u8> = vec![];
     let key_size = guess_key_size(&ct);
-    let block = transpose_block(into_block_lossy(&ct, key_size));
+    let block = transpose_block(&into_block_lossy(&ct, key_size));
 
     // for each row in the block is a XORed ciphertext
     for row in block.iter() {
@@ -63,21 +63,6 @@ fn into_block_lossy(s: &[u8], size: u32) -> Vec<Vec<u8>> {
     block
 }
 
-// TODO: add precondition contract to check all_equal_length for the input
-// TODO: improve to more effeicient in-place transposition
-fn transpose_block(block: Vec<Vec<u8>>) -> Vec<Vec<u8>> {
-    let mut transposed: Vec<Vec<u8>> = vec![];
-    for row in block.iter() {
-        for (index, &byte) in row.iter().enumerate() {
-            match transposed.get_mut(index) {
-                Some(v) => v.push(byte),
-                None => transposed.insert(index, vec![byte]),
-            };
-        }
-    }
-    transposed
-}
-
 #[cfg(test)]
 mod vigenere_tests {
     use super::*;
@@ -95,18 +80,6 @@ mod vigenere_tests {
         assert_eq!(
             into_block_lossy(b"abcdefghijklmnopqrstuvwxyz12345678", 6),
             vec![b"abcdef", b"ghijkl", b"mnopqr", b"stuvwx", b"yz1234"]
-        );
-    }
-
-    #[test]
-    fn test_transpose_block() {
-        assert_eq!(
-            transpose_block(vec![
-                "jack".as_bytes().to_vec(),
-                "alex".as_bytes().to_vec(),
-                "eric".as_bytes().to_vec(),
-            ]),
-            vec![b"jae", b"alr", b"cei", b"kxc"]
         );
     }
 }

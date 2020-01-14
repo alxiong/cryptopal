@@ -83,6 +83,7 @@ fn plaintext_eval(pt: &str) -> f32 {
     score
 }
 
+// TODO: improve the reliability and accuracy of this function.
 /// Break substitution cipher XORed with one single byte
 pub fn break_single_byte_xor(ct: &[u8]) -> String {
     // count the occurance of each char

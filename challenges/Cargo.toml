@@ -24,3 +24,6 @@ path = "../cryptanalysis"
 
 [dependencies.cipher]
 path = "../cipher"
+
+[dependencies.prng]
+path = "../prng"

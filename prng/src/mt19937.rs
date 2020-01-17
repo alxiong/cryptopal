@@ -4,13 +4,13 @@ use std::cmp::Ordering;
 use std::fmt;
 
 #[rustfmt::skip]
-struct Coefficients<T> {
-    w: u8, n: u32, m: u32, r: u8,
-    a: T,
-    b: T, c: T,
-    s: T, t: T,
-    u: T, d: T, l: T,
-    f: T,
+pub struct Coefficients<T> {
+    pub w: u8, pub n: u32, pub m: u32, pub r: u8,
+    pub a: T,
+    pub b: T, pub c: T,
+    pub s: T, pub t: T,
+    pub u: T, pub d: T, pub l: T,
+    pub f: T,
 }
 
 impl<T> fmt::Debug for Coefficients<T> {
@@ -22,7 +22,7 @@ impl<T> fmt::Debug for Coefficients<T> {
 // NOTE: `if` and `match` in const is still a nightly feature
 // see: https://blog.rust-lang.org/inside-rust/2019/11/25/const-if-match.html
 #[rustfmt::skip]
-const COEFF_32: Coefficients<u32> = Coefficients {
+pub const COEFF_32: Coefficients<u32> = Coefficients {
     w: 32, n: 624, m: 397, r: 31,
     a: 0x9908B0DF,
     u: 11, d: 0xFFFFFFFF,
@@ -47,6 +47,13 @@ impl MT19937Rng {
         };
         rng.init(seed);
         rng
+    }
+
+    pub fn from(mt: &[u32], index: usize) -> MT19937Rng {
+        MT19937Rng {
+            mt: mt.to_owned(),
+            index,
+        }
     }
 
     // Initialize the generator from a seed

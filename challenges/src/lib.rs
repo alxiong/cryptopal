@@ -1,6 +1,8 @@
+#![allow(dead_code)]
 use rand::{self, RngCore};
 
 pub mod chal18;
+pub mod chal23;
 
 pub fn random_bytes(size: u32) -> Vec<u8> {
     let mut bytes = vec![0 as u8; size as usize];

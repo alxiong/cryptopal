@@ -18,7 +18,7 @@ pub trait Cipher {
     fn decrypt(&self, key: &[u8], ct: &[u8]) -> Vec<u8>;
 }
 
-/// Instantiate a new cipher provided a specific mode and optional initialization vector
+/// Instantiate a new cipher provided a specific mode and default initialization vector/nonce
 pub fn new(mode: Mode) -> Box<dyn Cipher> {
     match mode {
         Mode::CBC => Box::from(cbc::AES_128_CBC::new()),

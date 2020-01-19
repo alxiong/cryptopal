@@ -4,12 +4,20 @@ use openssl::symm::{Cipher as SslCipher, Crypter as SslCrypter, Mode};
 use xor;
 
 #[allow(non_camel_case_types)]
-pub struct AES_128_CBC {}
+pub struct AES_128_CBC {
+    iv: [u8; 16],
+}
 
 impl AES_128_CBC {
     /// Instantiate a new `AES_128_CBC` cipher with an all-zero `iv`.
     pub fn new() -> AES_128_CBC {
-        AES_128_CBC {}
+        let mut iv = [0 as u8; 16];
+        random_bytes_array(&mut iv);
+        AES_128_CBC { iv }
+    }
+
+    pub fn from_iv(iv: [u8; 16]) -> AES_128_CBC {
+        AES_128_CBC { iv }
     }
 
     /// Validate whether `blocks` is truncated into a list of 128-bit(16-byte) block.
@@ -74,10 +82,7 @@ impl Cipher for AES_128_CBC {
         Self::validate_block(&msg_block);
 
         let mut ct: Vec<Vec<u8>> = vec![Vec::new(); msg_block.len()];
-        let mut iv = [0 as u8; 16];
-        random_bytes_array(&mut iv);
-
-        let mut last: Vec<u8> = iv.to_vec();
+        let mut last: Vec<u8> = self.iv.to_vec();
         let mut encrypter =
             SslCrypter::new(SslCipher::aes_128_ecb(), Mode::Encrypt, key, None).unwrap();
         encrypter.pad(false); // disable padding from ECB encryption, only use it as a pure AES Encryption
@@ -93,7 +98,7 @@ impl Cipher for AES_128_CBC {
 
             last = ct[i].clone();
         }
-        [iv.to_vec(), from_blocks(&ct)].concat()
+        [self.iv.to_vec(), from_blocks(&ct)].concat()
     }
 
     fn decrypt(&self, key: &[u8], ct: &[u8]) -> Vec<u8> {

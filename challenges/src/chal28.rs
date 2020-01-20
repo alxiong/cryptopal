@@ -7,7 +7,7 @@ pub trait MAC {
     fn verify(&self, msg: &[u8], tag: &[u8]) -> bool;
 }
 
-struct SecretPrefixMac {
+pub struct SecretPrefixMac {
     key: Vec<u8>,
 }
 
@@ -16,6 +16,19 @@ impl SecretPrefixMac {
         SecretPrefixMac {
             key: random_bytes(rand::random::<u8>() as u32),
         }
+    }
+
+    /// Signed MAC on msg without padding
+    pub fn raw_sign(&self, msg: &[u8]) -> Vec<u8> {
+        let mut h = Sha1::new();
+        h.digest_from_padded_input(&[self.key.clone(), msg.to_vec()].concat())
+            .bytes()
+            .to_vec()
+    }
+
+    /// Sign a MAC and return Sha1 (its internal states)
+    pub fn transparent_sign(&self, msg: &[u8]) -> Sha1 {
+        Sha1::from([self.key.clone(), msg.to_vec()].concat())
     }
 }
 

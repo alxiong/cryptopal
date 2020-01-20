@@ -12,7 +12,6 @@ openssl-sys = "0.9"
 openssl = "0.10"
 serde_json = "1.0"
 anyhow = "1.0"
-sha1 = "0.6"
 
 [dependencies.xor]
 path = "../xor"
@@ -28,3 +27,6 @@ path = "../cipher"
 
 [dependencies.prng]
 path = "../prng"
+
+[dependencies.sha1]
+path = "../rust-sha1"

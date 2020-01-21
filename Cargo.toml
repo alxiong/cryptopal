@@ -8,5 +8,8 @@ members = [
     "cipher",
     "prng",
     "rust-sha1",
-    "md4"
+    "md4",
+    # reason for reimplementation rather than using existing crate: 1. practice, 2. don't want to rely on
+    # self-modified `rust-sha1` module
+    "hmac"
 ]

@@ -30,3 +30,6 @@ path = "../prng"
 
 [dependencies.sha1]
 path = "../rust-sha1"
+
+[dependencies.md4]
+path = "../md4"

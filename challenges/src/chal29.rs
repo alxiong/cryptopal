@@ -40,7 +40,7 @@ pub fn get_md_padding(msg: &[u8]) -> Vec<u8> {
 mod tests {
     use super::*;
     #[test]
-    fn verify_get_md_padding() {
+    fn verify_sha1_md_padding() {
         let msg = "The quick brown fox jumps over the lazy dog".as_bytes();
         let padding = get_md_padding(&msg);
         let mut h1 = Sha1::new();

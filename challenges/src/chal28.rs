@@ -1,11 +1,6 @@
-use super::random_bytes;
+pub use super::{random_bytes, MAC};
 use rand;
 use sha1::Sha1;
-
-pub trait MAC {
-    fn sign(&self, msg: &[u8]) -> Vec<u8>;
-    fn verify(&self, msg: &[u8], tag: &[u8]) -> bool;
-}
 
 pub struct SecretPrefixMac {
     key: Vec<u8>,

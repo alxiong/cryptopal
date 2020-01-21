@@ -19,17 +19,6 @@
 //!            "2ef7bde608ce5404e97d5f042f95f89f1c232871");
 //! # }
 //! ```
-//!
-//! The sha1 object can be updated multiple times.  If you only need to use
-//! it once you can also use shortcuts:
-//!
-//! ```
-//! extern crate sha1;
-//! # fn main() {
-//! assert_eq!(sha1::Sha1::from("Hello World!").hexdigest(),
-//!            "2ef7bde608ce5404e97d5f042f95f89f1c232871");
-//! # }
-//! ```
 
 #![no_std]
 #![deny(missing_docs)]

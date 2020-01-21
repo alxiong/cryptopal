@@ -1,7 +1,7 @@
-use challenges::{chal28::*, chal29::*};
+use challenges::chal30::*;
 
 fn main() {
-    println!("🔓 Challenge 29");
+    println!("🔓 Challenge 30");
     let mac = SecretPrefixMac::new();
     let key_size = deduce_key_size(&mac).unwrap();
     let original_msg =
@@ -10,8 +10,8 @@ fn main() {
     let padding = get_md_padding(&random_bytes(key_size + original_msg.len() as u32));
     let extension = ";admin=true".as_bytes();
     let mut h = mac.transparent_sign(&[original_msg, &padding].concat());
-    h.update(&extension);
-    let forged_tag = h.digest().bytes();
+    h.input(&extension);
+    let forged_tag = h.result()[..].to_vec();
 
     assert!(mac.verify(&[original_msg, &padding, extension].concat(), &forged_tag));
     println!("Successfully forged a tag via extension attack");

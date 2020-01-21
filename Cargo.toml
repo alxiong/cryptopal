@@ -7,5 +7,6 @@ members = [
     "cryptanalysis",
     "cipher",
     "prng",
-    "rust-sha1"
+    "rust-sha1",
+    "md4"
 ]

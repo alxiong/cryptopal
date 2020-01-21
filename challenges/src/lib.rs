@@ -1,4 +1,6 @@
+#![deny(clippy::all)]
 #![allow(dead_code)]
+
 use rand::{self, RngCore};
 
 pub mod chal18;
@@ -15,8 +17,8 @@ pub fn random_bytes(size: u32) -> Vec<u8> {
 }
 
 pub fn random_bytes_array(arr: &mut [u8]) {
-    for i in 0..arr.len() {
-        arr[i] = rand::random::<u8>();
+    for elem in arr.iter_mut() {
+        *elem = rand::random::<u8>();
     }
 }
 

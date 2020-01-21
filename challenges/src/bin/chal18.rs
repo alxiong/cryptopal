@@ -1,5 +1,5 @@
 use cipher::{ctr::AES_128_CTR, Cipher};
-use encoding::base64::Base64;
+use encoding::base64::*;
 
 fn main() {
     println!("🔓 Challenge 18");
@@ -10,6 +10,6 @@ fn main() {
     .unwrap();
     let ct = ct_base64.as_bytes();
 
-    let pt = ctr_cipher.decrypt(&"YELLOW SUBMARINE".as_bytes(), &ct);
+    let pt = ctr_cipher.decrypt(&b"YELLOW SUBMARINE"[..], &ct);
     println!("Decrypted: {:?}", String::from_utf8(pt).unwrap());
 }

@@ -1,6 +1,6 @@
 use challenges::random_bytes;
 use cipher::{self, Mode};
-use encoding::base64::Base64;
+use encoding::base64::*;
 
 fn main() {
     println!("🔓 Challenge 12 (this may take a while ...)");
@@ -31,12 +31,12 @@ fn break_ecb(key: &Key) {
                 // for the first 16 unknown bytes, we need the prefix to build experiment group input
                 pt_experiment.extend_from_slice(&vec![0 as u8; 16 - deciphered.len() - 1]);
                 pt_experiment.extend_from_slice(&deciphered[..]);
-                pt_experiment.extend_from_slice(&vec![byte]);
+                pt_experiment.extend_from_slice(&[byte]);
             } else {
                 // for the 16-th unknown byte onwards, we construct the experiment group input from part of
                 // the deciphered bytes
                 pt_experiment.extend_from_slice(&deciphered[i - 15..i]);
-                pt_experiment.extend_from_slice(&vec![byte]);
+                pt_experiment.extend_from_slice(&[byte]);
             }
 
             let ct_experiment = key.encryption_oracle(&pt_experiment);
@@ -89,7 +89,7 @@ fn detect_ecb(key: &Key) -> bool {
 }
 
 fn decipher_unknown_len(key: &Key) -> Option<usize> {
-    let max_unknown_len = key.encryption_oracle(&vec![]).len();
+    let max_unknown_len = key.encryption_oracle(&[]).len();
     for padding_len in 1..16 {
         if key.encryption_oracle(&vec![0 as u8; padding_len]).len() == max_unknown_len + 16 {
             return Some(max_unknown_len - padding_len);

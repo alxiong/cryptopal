@@ -1,5 +1,5 @@
 use cipher::{self, Mode};
-use encoding::base64::Base64;
+use encoding::base64::*;
 use std::fs;
 
 fn main() {
@@ -10,7 +10,7 @@ fn main() {
         .lines()
         .collect();
     let ct_bytes = Base64::from_str(&ct_base64).unwrap().as_bytes();
-    let key = "YELLOW SUBMARINE".as_bytes();
+    let key = b"YELLOW SUBMARINE".to_vec();
 
     let pt = cbc_cipher.decrypt(&key, &ct_bytes);
     println!("decrypted message: \n{:?}", String::from_utf8(pt).unwrap());

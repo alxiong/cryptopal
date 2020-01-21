@@ -1,3 +1,4 @@
+#![deny(clippy::all)]
 pub mod cbc;
 pub mod ctr;
 pub mod ecb;

@@ -1,5 +1,5 @@
 use cryptanalysis::vigenere;
-use encoding::base64::Base64;
+use encoding::base64::*;
 use encoding::hex;
 use std::fs;
 

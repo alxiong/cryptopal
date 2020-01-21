@@ -15,7 +15,7 @@ fn main() {
 fn bitflipping_attack(key: &Key) {
     let input = random_bytes(2 + 16 * 2); // 2 is because the (prefix + 2) mod 16 = 0
     let mut ct = key.encryption_oracle(&input);
-    let xor_diff = xor::xor(&input[18..], &";admin=true;rand".as_bytes()).unwrap();
+    let xor_diff = xor::xor(&input[18..], &b";admin=true;rand"[..]).unwrap();
     let third_ciphertext_block = xor::xor(&ct[48..64], &xor_diff).unwrap();
     ct.splice(48..64, third_ciphertext_block.iter().cloned());
 
@@ -43,9 +43,9 @@ impl Key {
         }
 
         let mut actual_pt: Vec<u8> = vec![];
-        actual_pt.extend_from_slice(&"comment1=cooking\x20MCs;userdata=".as_bytes());
+        actual_pt.extend_from_slice(&b"comment1=cooking\x20MCs;userdata="[..]);
         actual_pt.extend_from_slice(&cleaned_input);
-        actual_pt.extend_from_slice(&";comment2=\x20like\x20a\x20pound\x20of\x20bacon".as_bytes());
+        actual_pt.extend_from_slice(&b";comment2=\x20like\x20a\x20pound\x20of\x20bacon"[..]);
 
         let cbc_cipher = cipher::new(Mode::CBC);
 
@@ -55,8 +55,6 @@ impl Key {
     pub fn decryption_oracle(&self, ct: &[u8]) -> bool {
         let cbc_cipher = cipher::new(Mode::CBC);
         let pt = cbc_cipher.decrypt(&self.0, ct);
-        pt.windows(11)
-            .position(|x| x == ";admin=true".as_bytes())
-            .is_some()
+        pt.windows(11).any(|x| x == b";admin=true")
     }
 }

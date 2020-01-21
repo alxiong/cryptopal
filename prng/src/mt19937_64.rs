@@ -1,4 +1,5 @@
 #![allow(non_snake_case)]
+#![allow(clippy::unreadable_literal)]
 pub use rand_core::{impls, Error, RngCore};
 use std::cmp::Ordering;
 use std::fmt;
@@ -135,7 +136,8 @@ impl RngCore for MT19937Rng {
     }
 
     fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), Error> {
-        Ok(self.fill_bytes(dest))
+        self.fill_bytes(dest);
+        Ok(())
     }
 }
 

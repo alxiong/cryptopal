@@ -11,7 +11,7 @@ fn main() {
     println!("  2. the trigram isn't perfect, thus evaluation of the actual key in key_stream might be off");
 }
 
-fn break_using_substitution(ct_arr: &Vec<Vec<u8>>) {
+fn break_using_substitution(ct_arr: &[Vec<u8>]) {
     let ct_transposed = transpose_block(&ct_arr);
     let mut pt_transposed: Vec<Vec<u8>> = vec![];
     for ct in ct_transposed.iter() {
@@ -24,7 +24,7 @@ fn break_using_substitution(ct_arr: &Vec<Vec<u8>>) {
     let pt = transpose_block(&pt_transposed);
     let pt: Vec<_> = pt
         .into_iter()
-        .map(|bytes| String::from_utf8(bytes).unwrap_or(String::new()))
+        .map(|bytes| String::from_utf8(bytes).unwrap_or_default())
         .collect();
     println!("pt: {:#?}", pt);
 }

@@ -105,8 +105,8 @@ pub fn break_single_byte_xor(ct: &[u8]) -> String {
     let mut pt_candidates: Vec<(String, f32)> = vec![];
     for &c in CHAR_FREQ.iter() {
         let xor_diff = ct_freq[0].0 ^ c;
-        let pt = xor::xor(&ct, &vec![xor_diff; ct.len()][..]).unwrap_or(vec![]);
-        let pt = String::from_utf8(pt).unwrap_or(String::new());
+        let pt = xor::xor(&ct, &vec![xor_diff; ct.len()][..]).unwrap_or_else(|_| vec![]);
+        let pt = String::from_utf8(pt).unwrap_or_default();
         let score = plaintext_eval(&pt);
         pt_candidates.push((pt, score));
     }

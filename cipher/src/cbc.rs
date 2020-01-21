@@ -4,6 +4,7 @@ use openssl::symm::{Cipher as SslCipher, Crypter as SslCrypter, Mode};
 use xor;
 
 #[allow(non_camel_case_types)]
+#[derive(Default)]
 pub struct AES_128_CBC {
     iv: [u8; 16],
 }
@@ -21,7 +22,7 @@ impl AES_128_CBC {
     }
 
     /// Validate whether `blocks` is truncated into a list of 128-bit(16-byte) block.
-    fn validate_block(blocks: &Vec<Vec<u8>>) {
+    fn validate_block(blocks: &[Vec<u8>]) {
         for block in blocks.iter() {
             if block.len() != 16 {
                 panic!("Invalid plaintext, not 128-bit block");
@@ -88,10 +89,10 @@ impl Cipher for AES_128_CBC {
         encrypter.pad(false); // disable padding from ECB encryption, only use it as a pure AES Encryption
 
         // CBC encrypt
-        for i in 0..(*msg_block).len() {
+        for (i, block) in msg_block.iter().enumerate() {
             ct[i] = vec![0; 32]; // avoid assertion
             let mut count = encrypter
-                .update(&xor::xor(&last, &(*msg_block)[i]).unwrap(), &mut ct[i])
+                .update(&xor::xor(&last, &block).unwrap(), &mut ct[i])
                 .unwrap();
             count += encrypter.finalize(&mut ct[i][count..]).unwrap();
             ct[i].truncate(count);
@@ -117,9 +118,9 @@ mod tests {
     #[test]
     fn cbc_correctness() {
         let cipher = AES_128_CBC::new();
-        let msg1 = "Privacy".as_bytes();
-        let msg2 = "Privacy is necessary".as_bytes();
-        let key = "i am pied piper!".as_bytes();
+        let msg1 = b"Privacy".to_vec();
+        let msg2 = b"Privacy is necessary".to_vec();
+        let key = b"i am pied piper!".to_vec();
 
         // test correctness of the cipher, i.e. decryption also works
         assert_eq!(cipher.decrypt(&key, &cipher.encrypt(&key, &msg1)), msg1);

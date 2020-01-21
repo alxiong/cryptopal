@@ -10,6 +10,7 @@ fn extension_attack(msg: &[u8], ext: &[u8]) -> Vec<u8> {
     h.digest().bytes().to_vec()
 }
 
+#[allow(clippy::identity_op)]
 // computes the Merkle-Damgard padding SHA1 produces
 pub fn get_md_padding(msg: &[u8]) -> Vec<u8> {
     let bits = msg.len() * 8;

@@ -1,8 +1,9 @@
 use super::random_bytes;
 use cipher::{ctr::AES_128_CTR, Cipher};
-use encoding::base64::Base64;
+use encoding::base64::*;
 use std::fs;
 
+#[derive(Default)]
 pub struct Key(Vec<u8>);
 impl Key {
     pub fn new() -> Key {

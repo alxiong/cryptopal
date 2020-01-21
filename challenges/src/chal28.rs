@@ -2,6 +2,7 @@ pub use super::{random_bytes, MAC};
 use rand;
 use sha1::Sha1;
 
+#[derive(Default)]
 pub struct SecretPrefixMac {
     key: Vec<u8>,
 }

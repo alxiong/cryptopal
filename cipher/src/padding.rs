@@ -30,11 +30,9 @@ pub fn add(blocks: &mut Vec<Vec<u8>>, size: u8) -> Result<(), PaddingError> {
     }
     if is_exact_multiple(blocks, size) {
         blocks.push(vec![size as u8; size as usize]);
-    } else {
-        if let Some(last_block) = blocks.last_mut() {
-            let padding_len: u8 = size - last_block.len() as u8;
-            last_block.append(&mut vec![padding_len; padding_len as usize]);
-        }
+    } else if let Some(last_block) = blocks.last_mut() {
+        let padding_len: u8 = size - last_block.len() as u8;
+        last_block.append(&mut vec![padding_len; padding_len as usize]);
     }
     Ok(())
 }
@@ -62,7 +60,7 @@ pub fn validate_padding(pt: &[u8], block_size: u8) -> bool {
 }
 
 // @dev: this is internal core logic to validate padding with a 2D vector parameter
-fn is_valid_padding(blocks: &Vec<Vec<u8>>, size: u8) -> bool {
+fn is_valid_padding(blocks: &[Vec<u8>], size: u8) -> bool {
     let pad_len: u8 = *blocks.last().unwrap().last().unwrap();
 
     if !is_exact_multiple(&blocks, size) || pad_len == 0 || pad_len > 16 {
@@ -81,16 +79,16 @@ fn is_valid_padding(blocks: &Vec<Vec<u8>>, size: u8) -> bool {
     true
 }
 
-fn is_valid_nonpad(blocks: &Vec<Vec<u8>>, size: u8) -> bool {
-    for i in 0..blocks.len() - 1 {
-        if blocks[i].len() != size as usize {
+fn is_valid_nonpad(blocks: &[Vec<u8>], size: u8) -> bool {
+    for block in blocks.iter().take(blocks.len() - 1) {
+        if block.len() != size as usize {
             return false;
         }
     }
     true
 }
 
-fn is_exact_multiple(blocks: &Vec<Vec<u8>>, size: u8) -> bool {
+fn is_exact_multiple(blocks: &[Vec<u8>], size: u8) -> bool {
     for block in blocks.iter() {
         if block.len() != size as usize {
             return false;
@@ -106,7 +104,7 @@ mod tests {
 
     #[test]
     fn add_padding() {
-        let mut blocks = into_blocks(&"YELLOW SUBMARINE".as_bytes(), 20);
+        let mut blocks = into_blocks(&b"YELLOW SUBMARINE".to_vec(), 20);
         let result = add(&mut blocks, 20);
         assert!(result.is_ok());
         assert_eq!(blocks[0], b"YELLOW SUBMARINE\x04\x04\x04\x04");
@@ -114,7 +112,7 @@ mod tests {
 
     #[test]
     fn remove_padding() {
-        let mut blocks = into_blocks(&"ICE ICE BABY\x04\x04\x04\x04".as_bytes(), 16);
+        let mut blocks = into_blocks(&b"ICE ICE BABY\x04\x04\x04\x04".to_vec(), 16);
         let result = remove(&mut blocks, 16);
         assert!(result.is_ok());
         assert_eq!(blocks[0], b"ICE ICE BABY");
@@ -123,14 +121,11 @@ mod tests {
     #[test]
     fn padding_validation() {
         assert!(validate_padding(
-            &"ICE ICE BABY\x04\x04\x04\x04".as_bytes(),
+            &b"ICE ICE BABY\x04\x04\x04\x04".to_vec(),
             16
         ));
-        assert!(!validate_padding(&"yellow submarine\x00".as_bytes(), 16));
-        assert!(!validate_padding(
-            &"ICE ICE BABY\x03\x03\x03".as_bytes(),
-            16
-        ));
-        assert!(!validate_padding(&"ICE ICE BABY".as_bytes(), 16));
+        assert!(!validate_padding(&b"yellow submarine\x00".to_vec(), 16));
+        assert!(!validate_padding(&b"ICE ICE BABY\x03\x03\x03".to_vec(), 16));
+        assert!(!validate_padding(&b"ICE ICE BABY".to_vec(), 16));
     }
 }

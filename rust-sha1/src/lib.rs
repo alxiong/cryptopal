@@ -22,6 +22,8 @@
 
 #![no_std]
 #![deny(missing_docs)]
+#![deny(clippy::all)]
+#![allow(clippy::unreadable_literal, clippy::identity_op)]
 
 #[cfg(feature = "serde")]
 extern crate serde;
@@ -83,6 +85,7 @@ const DEFAULT_STATE: Sha1State = Sha1State {
 };
 
 #[inline(always)]
+#[allow(clippy::transmute_ptr_to_ref)]
 fn as_block(input: &[u8]) -> &[u8; 64] {
     unsafe {
         assert!(input.len() == 64);
@@ -432,6 +435,7 @@ fn sha1rnds4m(abcd: u32x4, msg: u32x4) -> u32x4 {
 }
 
 impl Sha1State {
+    #[allow(clippy::needless_range_loop)]
     fn process(&mut self, block: &[u8; 64]) {
         let mut words = [0u32; 16];
         for i in 0..16 {
@@ -647,7 +651,7 @@ impl<'de> serde::de::Deserialize<'de> for Digest {
     }
 }
 
-#[cfg_attr(rustfmt, rustfmt_skip)]
+#[rustfmt::skip]
 #[cfg(test)]
 mod tests {
     extern crate std;
@@ -708,9 +712,9 @@ mod tests {
         let mut m = Sha1::new();
 
         m.reset();
-        m.update("The quick brown ".as_bytes());
-        m.update("fox jumps over ".as_bytes());
-        m.update("the lazy dog".as_bytes());
+        m.update(b"The quick brown ");
+        m.update(b"fox jumps over ");
+        m.update(b"the lazy dog");
         let hh = m.digest().to_string();
 
 
@@ -770,7 +774,7 @@ mod tests {
     }
 }
 
-#[cfg_attr(rustfmt, rustfmt_skip)]
+#[rustfmt::skip]
 #[cfg(all(test, feature="serde"))]
 mod serde_tests {
     extern crate std;

@@ -2,6 +2,7 @@ pub use super::{random_bytes, MAC};
 pub use md4::{Digest, Md4};
 use rand;
 
+#[derive(Default)]
 pub struct SecretPrefixMac {
     key: Vec<u8>,
 }
@@ -40,6 +41,7 @@ impl MAC for SecretPrefixMac {
     }
 }
 
+#[allow(clippy::identity_op)]
 pub fn get_md_padding(msg: &[u8]) -> Vec<u8> {
     let bits = msg.len() * 8;
     let extra = [

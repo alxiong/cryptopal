@@ -1,8 +1,9 @@
+#![deny(clippy::all)]
 pub mod base64;
 pub mod hex;
 
 use anyhow::Result;
-use base64::Base64;
+use base64::*;
 
 pub fn hex_to_base64(hex: &str) -> Result<Base64> {
     let bytes = hex::hexstr_to_bytes(&hex)?;

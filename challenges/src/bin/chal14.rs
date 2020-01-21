@@ -1,6 +1,6 @@
 use challenges::random_bytes;
 use cipher::{self, Mode};
-use encoding::base64::Base64;
+use encoding::base64::*;
 use std::collections::HashMap;
 use std::convert::TryInto;
 
@@ -67,6 +67,7 @@ fn break_ecb_harder(key: &Key) {
     println!("Decrypted: \n{:?}", String::from_utf8(deciphered).unwrap());
 }
 
+#[derive(Default)]
 pub struct Key(Vec<u8>);
 
 impl Key {
@@ -110,7 +111,7 @@ fn decipher_unknown_len(key: &Key) -> usize {
     let mut max_unknown_len = 0;
     while occurance.len() < 16 {
         let prefixed_unknown_ct_candidate: Vec<u8> =
-            get_post_signal_ct(&key.encryption_oracle(&vec![0 as u8; 3 * 16 - 1])).unwrap();
+            get_post_signal_ct(&key.encryption_oracle(&[0 as u8; 3 * 16 - 1])).unwrap();
         let ct_candidate_len = prefixed_unknown_ct_candidate.len();
         if ct_candidate_len > max_unknown_len {
             max_unknown_len = ct_candidate_len;
@@ -150,10 +151,10 @@ fn get_post_signal_ct(ct: &[u8]) -> Option<Vec<u8>> {
             }
             acc
         });
-
-    match result.1 {
-        true => Some(result.0.into_iter().flatten().collect::<Vec<u8>>()),
-        false => None,
+    if result.1 {
+        Some(result.0.into_iter().flatten().collect::<Vec<u8>>())
+    } else {
+        None
     }
 }
 
@@ -180,13 +181,13 @@ fn target_ct_mod0(pt: &[u8], key: &Key, controlled: bool) -> Vec<u8> {
         let ct: Vec<u8> = key.encryption_oracle(pt);
         if controlled {
             let result = get_post_signal_ct(&ct);
-            if result.is_some() {
-                return result.unwrap();
+            if let Some(val) = result {
+                return val;
             }
         } else {
             let result = get_signal_ct(&ct);
-            if result.is_some() {
-                return result.unwrap();
+            if let Some(val) = result {
+                return val;
             }
         }
     }

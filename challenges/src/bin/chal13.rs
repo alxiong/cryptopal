@@ -82,7 +82,7 @@ fn decrypt_profile(key: &[u8], ct: Vec<u8>) -> Result<Profile> {
 struct EmailAddr(String);
 impl EmailAddr {
     pub fn new(s: &str) -> Result<EmailAddr> {
-        if s.contains("&") || s.contains("=") {
+        if s.contains('&') || s.contains('=') {
             return Err(anyhow!(
                 "Invalid email address, should not contain metacharacter like & or ="
             ));
@@ -114,13 +114,13 @@ impl Profile {
         let mut role = String::new();
 
         // verify that number of & and = are correct
-        if s.matches("&").count() + 1 != s.matches("=").count() {
+        if s.matches('&').count() + 1 != s.matches('=').count() {
             return Err(anyhow!("Invalid query string, extra = or &"));
         }
 
-        let kv_pairs: Vec<&str> = s.split("&").collect();
+        let kv_pairs: Vec<&str> = s.split('&').collect();
         for pair in kv_pairs.iter() {
-            let key_val: Vec<_> = pair.split("=").collect();
+            let key_val: Vec<_> = pair.split('=').collect();
             match key_val[0] {
                 "email" => email = EmailAddr::new(key_val[1]).unwrap(),
                 "uid" => uid = key_val[1].parse::<u32>().unwrap(),
@@ -133,9 +133,6 @@ impl Profile {
     }
 
     fn to_query_str(&self) -> String {
-        String::from(format!(
-            "email={}&uid={}&role={}",
-            self.email.0, self.uid, self.role
-        ))
+        format!("email={}&uid={}&role={}", self.email.0, self.uid, self.role)
     }
 }

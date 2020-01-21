@@ -9,16 +9,15 @@ fn main() {
     break_statistically(&ct_arr);
 }
 
-fn break_statistically(ct_arr: &Vec<Vec<u8>>) {
+fn break_statistically(ct_arr: &[Vec<u8>]) {
     let mut shortest = ct_arr[0].len();
     for ct in ct_arr.iter() {
         if ct.len() < shortest {
             shortest = ct.len();
         }
     }
-    println!("shortest: {}", shortest);
     let ct_truncated: Vec<_> = ct_arr
-        .clone()
+        .to_owned()
         .into_iter()
         .flat_map(|mut ct| {
             ct.truncate(shortest);

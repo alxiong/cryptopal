@@ -19,7 +19,7 @@ fn recover_key() {
     let pt = prepare_plaintext();
     let ct = chal24::encrypt(key, &pt);
 
-    let partial_key_stream = xor::xor(&"AAAAAAAAAAAAAA".as_bytes(), &ct[ct.len() - 14..]).unwrap();
+    let partial_key_stream = xor::xor(&b"AAAAAAAAAAAAAA"[..], &ct[ct.len() - 14..]).unwrap();
     for i in 0..(u16::max_value() as usize) + 1 {
         let mut mt_candidate = MT19937Rng::new(i as u32);
         let mut key_stream = vec![0 as u8; ct.len()];
@@ -33,7 +33,7 @@ fn recover_key() {
 
 fn prepare_plaintext() -> Vec<u8> {
     let mut pt = vec![rand::random::<u8>(); rand::random::<u8>() as usize];
-    pt.extend_from_slice(&"AAAAAAAAAAAAAA".as_bytes());
+    pt.extend_from_slice(&b"AAAAAAAAAAAAAA"[..]);
     pt
 }
 
@@ -57,8 +57,7 @@ fn check_reset_token(token: &[u8]) -> bool {
         .unwrap()
         .as_secs() as u16;
 
-    let partial_key_stream =
-        xor::xor(&"AAAAAAAAAAAAAA".as_bytes(), &token[token.len() - 14..]).unwrap();
+    let partial_key_stream = xor::xor(&b"AAAAAAAAAAAAAA"[..], &token[token.len() - 14..]).unwrap();
     for i in now - 60..now + 1 {
         let mut mt_candidate = MT19937Rng::new(i as u32);
         let mut key_stream = vec![0 as u8; token.len()];

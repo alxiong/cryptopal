@@ -1,16 +1,16 @@
-use anyhow::anyhow;
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use std::collections::HashMap;
+pub use std::str::FromStr;
 
-static BASE64_CHAR_SET: &'static str =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+static BASE64_CHAR_SET: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
 #[derive(Debug, PartialEq)]
 pub struct Base64 {
     value: String,
 }
 
-impl Base64 {
+impl FromStr for Base64 {
+    type Err = anyhow::Error;
     /// Validate and construct a `Base64` type from a base64 string,
     /// if the string `s` contains invalid (non-base64) character, then `anyhow::Error`
     /// will be returned, otherwise returns `Ok(Base64)`.
@@ -18,18 +18,13 @@ impl Base64 {
     /// # Example
     ///
     /// ```
-    /// use encoding::base64::Base64;
+    /// use encoding::base64::*;
     ///
     /// assert!(Base64::from_str(&"winv023 df-@#$").is_err());
     /// assert!(Base64::from_str(&"JIvenhd932+/dfe").is_ok());
     /// ```
-    pub fn from_str(s: &str) -> Result<Base64> {
-        if s.chars()
-            .filter(|&c| BASE64_CHAR_SET.contains(c))
-            .collect::<Vec<_>>()
-            .len()
-            != s.len()
-        {
+    fn from_str(s: &str) -> Result<Base64, Self::Err> {
+        if s.chars().filter(|&c| BASE64_CHAR_SET.contains(c)).count() != s.len() {
             Err(anyhow!("Invalid base64 String to create a new Base64 type"))
         } else {
             Ok(Base64 {
@@ -37,13 +32,15 @@ impl Base64 {
             })
         }
     }
+}
 
+impl Base64 {
     /// Convert base64 to raw bytes `Vec<u8>`
     ///
     /// # Example
     ///
     /// ```
-    /// use encoding::base64::Base64;
+    /// use encoding::base64::*;
     /// assert_eq!(Base64::from_str("Jk8DTWM=").unwrap().as_bytes(), vec![38, 79, 3, 77, 99]);
     /// ```
     pub fn as_bytes(&self) -> Vec<u8> {

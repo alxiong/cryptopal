@@ -1,4 +1,5 @@
 #![allow(non_snake_case)]
+#![allow(clippy::unreadable_literal)]
 pub use rand_core::{impls, Error, RngCore};
 use std::cmp::Ordering;
 use std::fmt;

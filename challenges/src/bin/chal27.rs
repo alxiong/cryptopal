@@ -10,8 +10,8 @@ fn main() {
 }
 
 fn key_recovery_attack(key: &Key) {
-    let pt_0 = "yellow submarine".as_bytes().to_vec();
-    let pt_1_2 = "1234567890abcdef1234567890abcdef".as_bytes().to_vec();
+    let pt_0 = b"yellow submarine".to_vec();
+    let pt_1_2 = b"1234567890abcdef1234567890abcdef".to_vec();
 
     let ct = key.encryption_oracle(&[pt_0.clone(), pt_1_2].concat());
     let mut tampered_ct = vec![];
@@ -61,9 +61,6 @@ impl Key {
         if String::from_utf8(pt.clone()).is_err() {
             return Err(pt);
         }
-        Ok(pt
-            .windows(11)
-            .position(|x| x == ";admin=true".as_bytes())
-            .is_some())
+        Ok(pt.windows(11).any(|x| x == b";admin=true"))
     }
 }

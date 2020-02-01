@@ -10,8 +10,8 @@ fn main() {
     let padding = get_md_padding(&random_bytes(key_size + original_msg.len() as u32));
     let extension = b";admin=true";
     let mut h = mac.transparent_sign(&[original_msg, &padding].concat());
-    h.update(&extension[..]);
-    let forged_tag = h.digest().bytes();
+    h.input(&extension[..]);
+    let forged_tag = h.result().to_vec();
 
     assert!(mac.verify(&[original_msg, &padding, extension].concat(), &forged_tag));
     println!("Successfully forged a tag via extension attack");

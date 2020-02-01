@@ -32,8 +32,7 @@ impl Cipher for AES_128_CTR {
         }
 
         let mut ct: Vec<Vec<u8>> = vec![];
-        let mut encrypter =
-            SslCrypter::new(SslCipher::aes_128_ecb(), Mode::Encrypt, key, None).unwrap();
+        let mut encrypter = SslCrypter::new(SslCipher::aes_128_ecb(), Mode::Encrypt, key, None).unwrap();
         encrypter.pad(false);
 
         for (ctr, msg_block) in msg.chunks(16).enumerate() {
@@ -53,8 +52,7 @@ impl Cipher for AES_128_CTR {
 
     fn decrypt(&self, key: &[u8], ct: &[u8]) -> Vec<u8> {
         let mut pt: Vec<Vec<u8>> = vec![];
-        let mut encrypter =
-            SslCrypter::new(SslCipher::aes_128_ecb(), Mode::Encrypt, key, None).unwrap();
+        let mut encrypter = SslCrypter::new(SslCipher::aes_128_ecb(), Mode::Encrypt, key, None).unwrap();
         encrypter.pad(false);
 
         for (ctr, ct_block) in ct.chunks(16).enumerate() {

@@ -1,6 +1,6 @@
 pub use super::{random_bytes, MAC};
 use rand;
-use sha1::Sha1;
+pub use sha1::{Digest, Sha1};
 
 #[derive(Default)]
 pub struct SecretPrefixMac {
@@ -17,26 +17,29 @@ impl SecretPrefixMac {
     /// Signed MAC on msg without padding
     pub fn raw_sign(&self, msg: &[u8]) -> Vec<u8> {
         let mut h = Sha1::new();
-        h.digest_from_padded_input(&[self.key.clone(), msg.to_vec()].concat())
-            .bytes()
-            .to_vec()
+        h.input(&[self.key.clone(), msg.to_vec()].concat());
+        h.raw_result().to_vec()
     }
 
     /// Sign a MAC and return Sha1 (its internal states)
     pub fn transparent_sign(&self, msg: &[u8]) -> Sha1 {
-        Sha1::from([self.key.clone(), msg.to_vec()].concat())
+        let mut h = Sha1::new();
+        h.input([self.key.clone(), msg.to_vec()].concat());
+        h
     }
 }
 
 impl MAC for SecretPrefixMac {
     fn sign(&self, msg: &[u8]) -> Vec<u8> {
-        let h = Sha1::from([self.key.clone(), msg.to_vec()].concat());
-        h.digest().bytes().to_vec()
+        let mut h = Sha1::new();
+        h.input([self.key.clone(), msg.to_vec()].concat());
+        h.result().to_vec()
     }
 
     fn verify(&self, msg: &[u8], tag: &[u8]) -> bool {
-        let h = Sha1::from([self.key.clone(), msg.to_vec()].concat());
-        h.digest().bytes().to_vec() == tag.to_vec()
+        let mut h = Sha1::new();
+        h.input([self.key.clone(), msg.to_vec()].concat());
+        h.result().to_vec() == tag.to_vec()
     }
 }
 

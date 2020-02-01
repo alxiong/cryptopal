@@ -1,17 +1,17 @@
-use sha1::Sha1;
+use sha1::{Digest, Sha1};
 
 /// returns the hash digest of msg || PB || ext
 /// where PB is padding block, ext is extension msg
 fn extension_attack(msg: &[u8], ext: &[u8]) -> Vec<u8> {
     let padding = get_md_padding(&msg);
     let mut h = Sha1::new();
-    h.update(&[msg, &padding].concat());
-    h.update(ext);
-    h.digest().bytes().to_vec()
+    h.input(&[msg, &padding].concat());
+    h.input(ext);
+    h.result().to_vec()
 }
 
 #[allow(clippy::identity_op)]
-// computes the Merkle-Damgard padding SHA1 produces
+/// computes the Merkle-Damgard padding SHA1 produces
 pub fn get_md_padding(msg: &[u8]) -> Vec<u8> {
     let bits = msg.len() * 8;
     let extra = [
@@ -40,19 +40,6 @@ pub fn get_md_padding(msg: &[u8]) -> Vec<u8> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    #[test]
-    fn verify_sha1_md_padding() {
-        let msg = "The quick brown fox jumps over the lazy dog".as_bytes();
-        let padding = get_md_padding(&msg);
-        let mut h1 = Sha1::new();
-        let d1 = h1.digest_from_padded_input(&[msg, &padding].concat());
-
-        let mut h2 = Sha1::new();
-        h2.update(&msg);
-        let d2 = h2.digest();
-
-        assert_eq!(d1.data, d2.data);
-    }
 
     #[test]
     fn verify_extension_attack() {
@@ -62,10 +49,10 @@ mod tests {
 
         let mut h = Sha1::new();
         let padding = get_md_padding(&msg);
-        h.update(&msg);
-        h.update(&padding);
-        h.update(&ext);
-        let expected_tag = h.digest().bytes();
+        h.input(&msg);
+        h.input(&padding);
+        h.input(&ext);
+        let expected_tag = h.result().to_vec();
 
         assert_eq!(forged_tag, expected_tag);
     }

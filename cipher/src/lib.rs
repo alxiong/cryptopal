@@ -38,13 +38,13 @@ pub fn into_blocks(s: &[u8], size: usize) -> Vec<Vec<u8>> {
 }
 
 /// Inverse transformation of `into_blocks`
-pub fn from_blocks(blocks: &Vec<Vec<u8>>) -> Vec<u8> {
-    blocks.clone().into_iter().flatten().collect::<Vec<_>>()
+pub fn from_blocks(blocks: &[Vec<u8>]) -> Vec<u8> {
+    blocks.to_vec().into_iter().flatten().collect::<Vec<u8>>()
 }
 
 pub fn random_bytes_array(arr: &mut [u8]) {
-    for i in 0..arr.len() {
-        arr[i] = rand::random::<u8>();
+    for item in arr.iter_mut() {
+        *item = rand::random::<u8>();
     }
 }
 
@@ -55,12 +55,12 @@ mod tests {
     #[test]
     fn test_into_blocks() {
         assert_eq!(
-            into_blocks("helloworld".as_bytes(), 3),
+            into_blocks(b"helloworld", 3),
             vec![
-                "hel".as_bytes(),
-                "low".as_bytes(),
-                "orl".as_bytes(),
-                "d".as_bytes()
+                b"hel".to_vec(),
+                b"low".to_vec(),
+                b"orl".to_vec(),
+                b"d".to_vec()
             ]
         );
     }
@@ -68,13 +68,13 @@ mod tests {
     #[test]
     fn test_from_blocks() {
         assert_eq!(
-            from_blocks(&vec![
+            from_blocks(&[
                 b"hel".to_vec(),
                 b"low".to_vec(),
                 b"orl".to_vec(),
                 b"d".to_vec(),
             ]),
-            "helloworld".as_bytes()
+            b"helloworld"
         );
     }
 }

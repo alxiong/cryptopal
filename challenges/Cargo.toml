@@ -19,6 +19,7 @@ digest = "0.8"
 rocket = "0.4.2"
 hyper = "0.13"
 tokio = { version = "0.2", features = ["full"] }
+num = "0.2.1"
 
 [dependencies.xor]
 path = "../xor"
@@ -43,3 +44,6 @@ path = "../md4"
 
 [dependencies.hmac]
 path = "../hmac"
+
+[dependencies.dh]
+path = "../dh"

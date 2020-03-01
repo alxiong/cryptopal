@@ -1,6 +1,5 @@
 use super::{from_blocks, Cipher};
 use openssl::symm::{Cipher as SslCipher, Crypter as SslCrypter, Mode};
-use rand;
 
 #[allow(non_camel_case_types)]
 #[derive(Default)]

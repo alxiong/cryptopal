@@ -1,5 +1,4 @@
 pub use super::{random_bytes, MAC};
-use rand;
 pub use sha1::{Digest, Sha1};
 
 #[derive(Default)]
@@ -48,14 +47,14 @@ mod tests {
     use super::*;
     #[test]
     fn mac_correctness() {
-        let msg = "any message".as_bytes().to_vec();
+        let msg = b"any message".to_vec();
         let mac = SecretPrefixMac::new();
         assert!(mac.verify(&msg, &mac.sign(&msg)));
     }
 
     #[test]
     fn mac_unforgeable() {
-        let msg = "yellow submarine".as_bytes().to_vec();
+        let msg = b"yellow submarine".to_vec();
         let mac = SecretPrefixMac::new();
         // test you can't find a m' to collide on the same tag
         for _ in 0..1000 {

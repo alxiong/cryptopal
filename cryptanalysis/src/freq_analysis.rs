@@ -1,6 +1,5 @@
 use std::cmp::Ordering::Equal;
 use std::collections::HashMap;
-use xor;
 
 #[allow(dead_code)]
 // source: https://norvig.com/mayzner.html

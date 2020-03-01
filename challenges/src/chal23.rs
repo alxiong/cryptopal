@@ -74,7 +74,6 @@ fn clone_mt19937(mt19937: &mut MT19937Rng) -> MT19937Rng {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use rand;
     #[test]
     fn untemper_correctness() {
         for _ in 0..100 {

@@ -2,10 +2,10 @@
 pub use super::DH;
 use num::{bigint::RandBigInt, BigUint};
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct Dh {
-    g: BigUint,
-    p: BigUint,
+    pub g: BigUint,
+    pub p: BigUint,
 }
 
 impl Dh {
@@ -51,6 +51,7 @@ impl DH for Dh {
         let pri_key = rng.gen_biguint_below(&self.p);
 
         let pub_key = self.exp(&pri_key);
+        assert!(self.check_elm(&pub_key));
         (pri_key, pub_key)
     }
 

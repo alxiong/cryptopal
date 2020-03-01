@@ -4,8 +4,6 @@ pub mod ctr;
 pub mod ecb;
 pub mod padding;
 
-use rand;
-
 #[derive(Debug)]
 pub enum Mode {
     ECB,

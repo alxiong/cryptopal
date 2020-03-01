@@ -43,8 +43,8 @@ mod tests {
 
     #[test]
     fn verify_extension_attack() {
-        let msg = "The quick brown fox jumps over the lazy dog".as_bytes();
-        let ext = "append whatever I want".as_bytes();
+        let msg = b"The quick brown fox jumps over the lazy dog".to_vec();
+        let ext = b"append whatever I want".to_vec();
         let forged_tag = extension_attack(&msg, &ext);
 
         let mut h = Sha1::new();

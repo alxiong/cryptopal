@@ -1,7 +1,6 @@
 #![allow(dead_code)]
 use super::{from_blocks, into_blocks, padding, random_bytes_array, Cipher};
 use openssl::symm::{Cipher as SslCipher, Crypter as SslCrypter, Mode};
-use xor;
 
 #[allow(non_camel_case_types)]
 #[derive(Default)]

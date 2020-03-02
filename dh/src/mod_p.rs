@@ -26,6 +26,10 @@ impl Dh {
             .unwrap(),
         }
     }
+    pub fn rand_elm(&self) -> BigUint {
+        let mut rng = rand::thread_rng();
+        rng.gen_biguint_below(&self.p)
+    }
 }
 
 impl DH for Dh {
@@ -47,7 +51,6 @@ impl DH for Dh {
 
     fn key_gen(&self) -> (BigUint, Self::GroupElement) {
         let mut rng = rand::thread_rng();
-        // let pri_key = RandBigInt::gen_biguint_below(&mut rng, &self.p);
         let pri_key = rng.gen_biguint_below(&self.p);
 
         let pub_key = self.exp(&pri_key);

@@ -14,7 +14,7 @@ sha1 = { path = "../sha1" }
 md4 = { path = "../md4" }
 hmac = { path = "../hmac" }
 dh = { path = "../dh" }
-rand = "0.7"
+rand = "0.5"
 openssl-sys = "0.9"
 openssl = "0.10"
 serde_json = "1.0"
@@ -26,6 +26,6 @@ rocket = "0.4.2"
 rocket_contrib = "0.4.2"
 hyper = "0.13"
 tokio = { version = "0.2", features = ["full"] }
-num = "0.2.1"
+num = { version = "0.2.1", features = ["rand"] }
 sha2 = "0.8.1"
 bytes = "0.5"

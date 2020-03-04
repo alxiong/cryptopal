@@ -1,7 +1,6 @@
 use challenges::random_bytes_array;
 use cipher::{ctr::AES_128_CTR, Cipher};
 use std::fs;
-use xor;
 
 fn main() {
     println!("🔓 Challenge 25");

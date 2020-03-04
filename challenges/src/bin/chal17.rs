@@ -2,7 +2,6 @@ use challenges::random_bytes;
 use cipher::{self, cbc::AES_128_CBC, padding, Cipher};
 use rand::{self, Rng};
 use std::fs;
-use xor;
 
 fn main() {
     println!("🔓 Challenge 17");
@@ -15,10 +14,10 @@ fn padding_oracle_attack(key: &Key) {
 
     let mut found = false;
     let mut random_block = vec![];
-    // Explain: assuming the ciphertext is only 3 block long, if we tamper the second block c[1] and XOR with
-    // a random block B, then the decrypted 3rd block, m'[2] = m[2] ^ B.
-    // If m'[2] is a valid padded block, then the likihood suggests the last byte is 1, thus, we can reverse
-    // engineer the orignial last byte of m[2], which also is the padding length value
+    // Explain: assuming the ciphertext is only 3 block long, if we tamper the second block c[1] and XOR
+    // with a random block B, then the decrypted 3rd block, m'[2] = m[2] ^ B.
+    // If m'[2] is a valid padded block, then the likihood suggests the last byte is 1, thus, we can
+    // reverse engineer the orignial last byte of m[2], which also is the padding length value
     while !found {
         let mut ct_tampered = ct.clone();
         random_block = random_bytes(16);
@@ -34,22 +33,19 @@ fn padding_oracle_attack(key: &Key) {
 
     let last_byte = random_block.last().unwrap() ^ b'\x01';
     println!("Padding length is {}", last_byte);
-    // NOTE: up until here, based on the `last_byte`, we could already narrow down the plaintext based on their
-    // length mod 16, and even probably deduce which one out of the ten string is encrypted, but here, we will
-    // go further and directly decrypt the entire plaintext using padding_oracle, as if we know nothing about
-    // the plaintext
+    // NOTE: up until here, based on the `last_byte`, we could already narrow down the plaintext based
+    // on their length mod 16, and even probably deduce which one out of the ten string is
+    // encrypted, but here, we will go further and directly decrypt the entire plaintext using
+    // padding_oracle, as if we know nothing about the plaintext
     let mut pt = vec![last_byte; last_byte as usize];
 
     while pt.len() < ct.len() - 16 {
         let pt_len = pt.len();
         let mut random_block: Vec<u8> = vec![0 as u8; 16 - pt_len % 16];
         random_block.extend_from_slice(
-            &xor::xor(
-                &vec![(pt_len % 16 + 1) as u8; pt_len % 16],
-                &pt[..pt_len % 16],
-            )
-            .unwrap()
-            .as_slice(),
+            &xor::xor(&vec![(pt_len % 16 + 1) as u8; pt_len % 16], &pt[..pt_len % 16])
+                .unwrap()
+                .as_slice(),
         );
 
         let mut found = false;
@@ -75,10 +71,7 @@ fn padding_oracle_attack(key: &Key) {
 
             found = key.padding_oracle(&ct_tampered);
         }
-        pt.insert(
-            0,
-            random_block.get(15 - pt_len % 16).unwrap() ^ (pt_len % 16 + 1) as u8,
-        );
+        pt.insert(0, random_block.get(15 - pt_len % 16).unwrap() ^ (pt_len % 16 + 1) as u8);
     }
     println!("decrypted: {:?}", String::from_utf8(pt).unwrap());
 }

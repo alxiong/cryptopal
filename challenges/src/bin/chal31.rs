@@ -8,7 +8,6 @@ use rocket::{
     config::{Config, Environment, LoggingLevel},
     http::{RawStr, Status},
 };
-use tokio;
 
 use std::thread;
 use std::time::{Duration, Instant};

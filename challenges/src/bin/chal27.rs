@@ -1,7 +1,6 @@
 use challenges::random_bytes;
 use cipher::{cbc::AES_128_CBC, Cipher};
 use std::convert::TryInto;
-use xor;
 
 fn main() {
     println!("🔓 Challenge 27");

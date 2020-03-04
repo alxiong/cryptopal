@@ -1,7 +1,6 @@
 use challenges::chal24;
 use prng::mt19937::{MT19937Rng, RngCore};
 use std::time::SystemTime;
-use xor;
 
 fn main() {
     println!("🔓 Challenge 24");

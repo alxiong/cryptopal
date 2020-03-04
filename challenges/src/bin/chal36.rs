@@ -9,7 +9,6 @@ use num::BigUint;
 use sha2::{Digest, Sha256};
 use std::thread;
 use std::time::Duration;
-use tokio;
 
 const EMAIL: &str = "outlook@gmail.com";
 const PASSWORD: &str = "password_is_username";
@@ -56,9 +55,9 @@ impl SrpClient for ClientState {
 
         // derive shared session key
         let mut base = B.clone();
-        let kgx = (&self.k * &self.dh.exp(&x)) % &self.dh.p;
+        let kgx = (self.k * &self.dh.exp(&x)) % &self.dh.p;
         if base > kgx {
-            base = base - kgx;
+            base -= kgx;
         } else {
             base = base + &self.dh.p - kgx;
         }

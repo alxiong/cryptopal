@@ -7,7 +7,6 @@ use num::bigint::RandBigInt;
 use sha2::{Digest, Sha256};
 use std::thread;
 use std::time::Duration;
-use tokio;
 
 const DICTIONARY: &[&[u8]] = &[
     b"dad birthday",
@@ -31,7 +30,7 @@ async fn main() {
         println!("\n\n✔ ️️Succesfully established a secure channel!\n\n");
     }
 
-    if mitm_dict_attack().unwrap() == chal38::PASSWORD.to_string() {
+    if mitm_dict_attack().unwrap() == chal38::PASSWORD {
         println!("\n\n😈 ️Succesfully extract the password!\n\n");
     }
 }

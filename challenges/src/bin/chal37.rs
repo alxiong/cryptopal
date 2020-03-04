@@ -6,7 +6,6 @@ use num::{BigUint, Zero};
 use sha2::{Digest, Sha256};
 use std::thread;
 use std::time::Duration;
-use tokio;
 
 const EMAIL: &str = "outlook@gmail.com";
 

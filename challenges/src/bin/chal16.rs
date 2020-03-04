@@ -1,6 +1,5 @@
 use challenges::random_bytes;
 use cipher::{self, Mode};
-use xor;
 
 fn main() {
     println!("🔓 Challenge 16");

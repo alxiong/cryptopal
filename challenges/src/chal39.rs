@@ -82,8 +82,7 @@ fn rand_two_primes() -> (BigUint, BigUint) {
     (primes[0].to_owned(), primes[1].to_owned())
 }
 
-// wlog, a < n
-fn mod_inv(a: &BigUint, n: &BigUint) -> Option<BigUint> {
+pub fn mod_inv(a: &BigUint, n: &BigUint) -> Option<BigUint> {
     let mut t = BigInt::zero();
     let mut new_t = BigInt::one();
     let mut r = BigInt::from_biguint(Sign::Plus, n.clone());
@@ -122,7 +121,7 @@ pub struct KeyPair {
     priKey: PriKey,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct PubKey {
     pub e: BigUint,
     pub n: BigUint,
@@ -150,6 +149,29 @@ impl Default for KeyPair {
     }
 }
 
+impl KeyPair {
+    /// generate certain number of key pairs
+    /// currently only support <= 4 pairs
+    pub fn gen(pairs: usize) -> Vec<Self> {
+        let mut key_pairs = vec![];
+        for i in 0..pairs {
+            let p = BigUint::parse_bytes(PRIMES[2 * i], 16).unwrap();
+            let q = BigUint::parse_bytes(PRIMES[2 * i + 1], 16).unwrap();
+            let n = &p * &q;
+            let phi_n = (p - BigUint::one()) * (q - BigUint::one());
+
+            let e = BigUint::parse_bytes(b"3", 10).unwrap(); // PubKey
+            let d = mod_inv(&e, &phi_n).expect("should be able to derive private key");
+
+            key_pairs.push(KeyPair {
+                pubKey: PubKey { e, n: n.clone() },
+                priKey: PriKey { d, n },
+            });
+        }
+        key_pairs
+    }
+}
+
 impl PubKey {
     pub fn encrypt(&self, m: &BigUint) -> BigUint {
         m.modpow(&self.e, &self.n)
@@ -169,7 +191,11 @@ mod tests {
     #[test]
     fn test_modinv() {
         assert_eq!(
-            mod_inv(&BigUint::from_u64(17).unwrap(), &BigUint::from_u64(3120).unwrap()).unwrap(),
+            mod_inv(
+                &BigUint::from_u64(17).unwrap(),
+                &BigUint::from_u64(3120).unwrap()
+            )
+            .unwrap(),
             BigUint::from_u64(2753).unwrap()
         );
     }

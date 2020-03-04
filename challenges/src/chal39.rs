@@ -118,7 +118,7 @@ pub fn mod_inv(a: &BigUint, n: &BigUint) -> Option<BigUint> {
 #[derive(Debug)]
 pub struct KeyPair {
     pub pubKey: PubKey,
-    priKey: PriKey,
+    pub priKey: PriKey,
 }
 
 #[derive(Debug, Clone)]

@@ -195,7 +195,7 @@ pub async fn query_reset() -> Result<bool> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct ClientState {
     dh: Dh,
     a: BigUint,

@@ -1,4 +1,4 @@
 edition = "2018"
-max_width = 100
-comment_width = 90
+max_width = 110
+comment_width = 100
 wrap_comments = true

@@ -29,3 +29,6 @@ tokio = { version = "0.2", features = ["full"] }
 num = { version = "0.2.1", features = ["rand"] }
 sha2 = "0.8.1"
 bytes = "0.5"
+regex = "1"
+lazy_static = "1.4.0"
+ring = "^0.13"

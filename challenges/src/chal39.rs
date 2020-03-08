@@ -1,6 +1,10 @@
 #![allow(clippy::many_single_char_names)]
+use lazy_static::lazy_static;
 use num::{bigint::Sign, BigInt, BigUint, One, Zero};
 use rand::seq;
+use regex::bytes::Regex;
+use ring::der;
+use sha1::{Digest, Sha1};
 
 // generating prime is hard, borrow existing prime from @rozbb
 // https://github.com/rozbb/mcc-rust/blob/master/set5/c39.rs
@@ -72,6 +76,27 @@ static PRIMES: &[&[u8]] = &[
     7006818571D3D083960B34CEB33313F364988FA3EA29DD806E0EBB843CC3BA095E756982D6978DD38080C0402CD19F\
     268782B15A02841A82AB3C4346D86C7A206303E269",
 ];
+
+// credit: https://github.com/briansmith/ring/blob/master/src/rsa/padding.rs#L171-L190
+macro_rules! pkcs1_digestinfo_prefix {
+    ( $name:ident, $digest_len:expr, $digest_oid_len:expr,
+      [ $( $digest_oid:expr ),* ] ) => {
+        pub static $name: [u8; 2 + 8 + $digest_oid_len] = [
+            der::Tag::Sequence as u8, 8 + $digest_oid_len + $digest_len,
+                der::Tag::Sequence as u8, 2 + $digest_oid_len + 2,
+                    der::Tag::OID as u8, $digest_oid_len, $( $digest_oid ),*,
+                    der::Tag::Null as u8, 0,
+                der::Tag::OctetString as u8, $digest_len,
+        ];
+    }
+}
+
+pkcs1_digestinfo_prefix!(
+    SHA1_PKCS1_DIGESTINFO_PREFIX,
+    20,
+    5,
+    [0x2b, 0x0e, 0x03, 0x02, 0x1a]
+);
 
 fn rand_two_primes() -> (BigUint, BigUint) {
     let mut rng = rand::thread_rng();
@@ -173,8 +198,45 @@ impl KeyPair {
 }
 
 impl PubKey {
+    /// RSA encryption
     pub fn encrypt(&self, m: &BigUint) -> BigUint {
         m.modpow(&self.e, &self.n)
+    }
+
+    /// unpad the PKCS1.5 padding on RSA Signature of the format: 00 01 ff ... ff 00 ASN.1 HASH
+    /// this unpad function returns the "HASH" payload
+    fn unpad_sig(sig: &[u8]) -> Option<Vec<u8>> {
+        lazy_static! {
+            // (?-u) is flag to disable ASCII(valid UTF-8) charater restrait by default
+            // \xff{8,}? is at least 8 bytes of `\xff` as the spec
+            // \x00 is the signal for upcoming `ASN.1 HASH` which is captured in `asn` and `payload`
+            static ref RE_SIG_PAD: Regex = Regex::new(r"(?s-u)^\x00\x01\xFF{8,}?\x00(?P<asn>.{15})(?P<payload>.{20})").unwrap();
+        }
+        let cap = RE_SIG_PAD.captures(&sig);
+        match cap {
+            None => None,
+            Some(c) => {
+                if c.name("asn").unwrap().as_bytes() != SHA1_PKCS1_DIGESTINFO_PREFIX {
+                    panic!("wrong ASN.1 encoding, internal error, only support SHA1_PKCS_1 for now");
+                    // should never reach here
+                }
+                Some(c.name("payload").unwrap().as_bytes().to_vec())
+            }
+        }
+    }
+
+    /// broken RSA signature verification found in some PKCS#1 v1.5 implementations
+    pub fn broken_sig_verify(&self, msg: &[u8], sig: &[u8]) -> bool {
+        let sig_pt = self.encrypt(&BigUint::from_bytes_be(&sig)); // signature plaintext
+        let sig_pt = [b"\x00".to_vec(), sig_pt.to_bytes_be()].concat(); // put back the \x00 chunk off during conversion
+        match Self::unpad_sig(&sig_pt) {
+            None => false,
+            Some(payload) => {
+                let mut h = Sha1::default();
+                h.input(&msg);
+                h.result().to_vec() == payload
+            }
+        }
     }
 }
 
@@ -191,11 +253,7 @@ mod tests {
     #[test]
     fn test_modinv() {
         assert_eq!(
-            mod_inv(
-                &BigUint::from_u64(17).unwrap(),
-                &BigUint::from_u64(3120).unwrap()
-            )
-            .unwrap(),
+            mod_inv(&BigUint::from_u64(17).unwrap(), &BigUint::from_u64(3120).unwrap()).unwrap(),
             BigUint::from_u64(2753).unwrap()
         );
     }
@@ -206,5 +264,26 @@ mod tests {
         let m = BigUint::from_u64(42).unwrap();
         let ct = key_pair.pubKey.encrypt(&m);
         assert_eq!(key_pair.priKey.decrypt(&ct), m);
+    }
+
+    #[test]
+    fn pkcs1_5_sig_unpad() {
+        let sig1 = [
+            vec![0, 1, 255, 255, 255, 255, 255, 255, 255, 255, 0],
+            SHA1_PKCS1_DIGESTINFO_PREFIX.to_vec(),
+            vec![100 as u8; 20],
+        ]
+        .concat();
+        let sig2 = [
+            vec![0, 1, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0],
+            SHA1_PKCS1_DIGESTINFO_PREFIX.to_vec(),
+            vec![200 as u8; 30],
+        ]
+        .concat();
+        let sig3 = vec![0, 1, 255, 255, 255, 255, 255, 255, 255, 1];
+
+        assert_eq!(PubKey::unpad_sig(&sig1).unwrap(), vec![100 as u8; 20]);
+        assert_eq!(PubKey::unpad_sig(&sig2).unwrap(), vec![200 as u8; 20]);
+        assert_eq!(PubKey::unpad_sig(&sig3), None);
     }
 }

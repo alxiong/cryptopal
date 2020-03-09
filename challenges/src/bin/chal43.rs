@@ -57,7 +57,7 @@ fn main() {
         let guess = dsa_leaky_k_attack(&pk.pub_param.q, &msg, &k, &sig);
         if is_dsa_key_pair(&pk, &guess)
             && hash_msg_to_hexstr(&guess.to_str_radix(16).as_bytes())
-                == String::from("0954edd5e0afe5542a4adf012611a91912a3ec16")
+                == "0954edd5e0afe5542a4adf012611a91912a3ec16"
         {
             println!("Cracked your private key: {} !!", &guess.to_str_radix(16));
             process::exit(0);

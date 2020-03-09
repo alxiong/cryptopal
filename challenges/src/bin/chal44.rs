@@ -60,6 +60,5 @@ fn repeated_nonce_attack(m1: &DsaMessage, m2: &DsaMessage, q: &BigUint) -> BigUi
 }
 
 fn is_correct_prikey(guess: &BigUint) -> bool {
-    hash_msg_to_hexstr(&guess.to_str_radix(16).as_bytes())
-        == String::from("ca8f6f7c66fa362d40760d135b763eb8527d3d52")
+    hash_msg_to_hexstr(&guess.to_str_radix(16).as_bytes()) == "ca8f6f7c66fa362d40760d135b763eb8527d3d52"
 }

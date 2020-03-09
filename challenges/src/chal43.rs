@@ -4,7 +4,7 @@ use num::bigint::RandBigInt;
 use num::{BigUint, One, Zero};
 use sha1::{Digest, Sha1};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 /// group of public parameter for a DSA instance
 pub struct DsaPublicParam {
     pub p: BigUint,
@@ -77,6 +77,13 @@ impl DsaKeyPair {
         }
     }
 
+    /// key generation with specified (user chosen) g value (BAD BAD IDEA!!)
+    pub fn key_gen_with_generator(g: &BigUint) -> Self {
+        let mut key = Self::key_gen();
+        key.pub_param.g = g.clone();
+        key
+    }
+
     /// returns the public key for key distribution
     pub fn get_pub_key(&self) -> DsaPubKey {
         DsaPubKey {
@@ -103,6 +110,19 @@ impl DsaKeyPair {
         DsaSignature { r, s }
     }
 
+    /// a broken impl which does not check if r or s is zero
+    pub fn broken_sign(&self, msg: &[u8]) -> DsaSignature {
+        let mut rng = rand::thread_rng();
+        let k = rng.gen_biguint_range(&BigUint::one(), &self.pub_param.q);
+
+        let r = self.pub_param.g.modpow(&k, &self.pub_param.p) % &self.pub_param.q;
+
+        let hash = hash_msg_to_biguint(&msg);
+        let s = (mod_inv(&k, &self.pub_param.q).unwrap() * (hash + &self.pri_key * &r)) % &self.pub_param.q;
+
+        DsaSignature { r, s }
+    }
+
     /// dangerous function, only used for attack demo purpose
     /// returns (k, sig) where k is the randomly generated from Zq* during a standard sign
     pub fn leaky_sign(&self, msg: &[u8]) -> (BigUint, DsaSignature) {
@@ -124,6 +144,7 @@ impl DsaKeyPair {
     }
 }
 
+#[derive(Debug)]
 pub struct DsaPubKey {
     pub pub_param: DsaPublicParam,
     pub pub_key: BigUint,
@@ -173,7 +194,7 @@ pub fn dsa_leaky_k_attack(q: &BigUint, msg: &[u8], k: &BigUint, sig: &DsaSignatu
 
 /// given a pair of key, determine whether they are valid DSA key pair
 pub fn is_dsa_key_pair(pk: &DsaPubKey, sk: &BigUint) -> bool {
-    &pk.pub_param.g.modpow(&sk, &pk.pub_param.p) == &pk.pub_key
+    pk.pub_param.g.modpow(&sk, &pk.pub_param.p) == pk.pub_key
 }
 
 #[cfg(test)]

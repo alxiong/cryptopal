@@ -84,9 +84,9 @@ pub fn mod_inv(a: &BigUint, n: &BigUint) -> Option<BigUint> {
 /// returns (a-b) mod n
 pub fn mod_sub(a: &BigUint, b: &BigUint, n: &BigUint) -> BigUint {
     if a >= b {
-        (a - b).clone()
+        a - b
     } else {
-        (a + n - b).clone()
+        a + n - b
     }
 }
 

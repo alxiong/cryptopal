@@ -45,6 +45,7 @@ pub trait SrpClient {
 }
 
 #[allow(clippy::many_single_char_names)]
+/// returns a^-1 mod n (if exists)
 pub fn mod_inv(a: &BigUint, n: &BigUint) -> Option<BigUint> {
     let mut t = BigInt::zero();
     let mut new_t = BigInt::one();
@@ -79,6 +80,16 @@ pub fn mod_inv(a: &BigUint, n: &BigUint) -> Option<BigUint> {
     Some(t.to_biguint().unwrap())
 }
 
+#[allow(clippy::many_single_char_names)]
+/// returns (a-b) mod n
+pub fn mod_sub(a: &BigUint, b: &BigUint, n: &BigUint) -> BigUint {
+    if a >= b {
+        (a - b).clone()
+    } else {
+        (a + n - b).clone()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -91,6 +102,36 @@ mod tests {
             )
             .unwrap(),
             BigUint::parse_bytes(b"2753", 10).unwrap()
+        );
+    }
+
+    use num::Zero;
+    #[test]
+    fn test_modsub() {
+        let n = BigUint::parse_bytes(b"13", 10).unwrap();
+        assert_eq!(
+            mod_sub(
+                &BigUint::parse_bytes(b"7", 10).unwrap(),
+                &BigUint::parse_bytes(b"3", 10).unwrap(),
+                &n
+            ),
+            BigUint::parse_bytes(b"4", 10).unwrap()
+        );
+        assert_eq!(
+            mod_sub(
+                &BigUint::parse_bytes(b"3", 10).unwrap(),
+                &BigUint::parse_bytes(b"7", 10).unwrap(),
+                &n
+            ),
+            BigUint::parse_bytes(b"9", 10).unwrap()
+        );
+        assert_eq!(
+            mod_sub(
+                &BigUint::parse_bytes(b"12", 10).unwrap(),
+                &BigUint::parse_bytes(b"12", 10).unwrap(),
+                &n
+            ),
+            BigUint::zero()
         );
     }
 }

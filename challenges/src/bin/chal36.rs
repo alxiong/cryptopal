@@ -1,7 +1,7 @@
 #![allow(non_snake_case)]
 use challenges::{
     chal36::{self, *},
-    SrpClient,
+    mod_sub, SrpClient,
 };
 use dh::{mod_p::Dh, DH};
 use hmac::{Hmac, Mac};
@@ -54,13 +54,8 @@ impl SrpClient for ClientState {
         let x = bytes_to_biguint(&hasher.result().to_vec());
 
         // derive shared session key
-        let mut base = B.clone();
         let kgx = (self.k * &self.dh.exp(&x)) % &self.dh.p;
-        if base > kgx {
-            base -= kgx;
-        } else {
-            base = base + &self.dh.p - kgx;
-        }
+        let base = mod_sub(&B, &kgx, &self.dh.p);
         let S = base.modpow(&(&self.a + &u * &x), &self.dh.p);
 
         let mut hasher = Sha256::new();

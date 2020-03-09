@@ -164,13 +164,14 @@ pub fn hash_msg_to_biguint(msg: &[u8]) -> BigUint {
     BigUint::parse_bytes(&hex.as_bytes(), 16).unwrap()
 }
 
-pub fn dsa_leaky_k_attack(pk: &DsaPubKey, msg: &[u8], k: &BigUint, sig: &DsaSignature) -> BigUint {
-    let q = &pk.pub_param.q;
+/// given the leaked random k in the DSA signing phase, deduce the private key
+pub fn dsa_leaky_k_attack(q: &BigUint, msg: &[u8], k: &BigUint, sig: &DsaSignature) -> BigUint {
     let hash = hash_msg_to_biguint(&msg);
     let r_inv = mod_inv(&sig.r, q).unwrap();
     (&mod_sub(&(&sig.s * k), &hash, q) * r_inv) % q
 }
 
+/// given a pair of key, determine whether they are valid DSA key pair
 pub fn is_dsa_key_pair(pk: &DsaPubKey, sk: &BigUint) -> bool {
     &pk.pub_param.g.modpow(&sk, &pk.pub_param.p) == &pk.pub_key
 }

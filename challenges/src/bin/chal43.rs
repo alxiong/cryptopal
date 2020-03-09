@@ -18,7 +18,7 @@ fn main() {
         let msg = random_bytes(30); // arbitarily chosen message length
 
         let (k, sig) = dsa.leaky_sign(&msg);
-        let guess_key = dsa_leaky_k_attack(&pk, &msg, &k, &sig);
+        let guess_key = dsa_leaky_k_attack(&pk.pub_param.q, &msg, &k, &sig);
 
         if is_dsa_key_pair(&pk, &guess_key) {
             success_crack += 1;
@@ -29,7 +29,7 @@ fn main() {
         success_crack, total_crack
     );
 
-    println!("\nRealisitc attack on DSA signature with low entropy k ... (took me ~7min on my laptop)");
+    println!("\nRealisitc attack on DSA signature with low entropy k ... (took me ~7 min on my laptop)");
     let pk = DsaPubKey {
         pub_param: DsaPublicParam::default(),
         pub_key: BigUint::parse_bytes(
@@ -54,7 +54,7 @@ fn main() {
     // given that k is between 0 and 2^16 due to poor entropy, we can crack it.
     for _k in 1..65537 {
         let k = BigUint::from_u64(_k).unwrap();
-        let guess = dsa_leaky_k_attack(&pk, &msg, &k, &sig);
+        let guess = dsa_leaky_k_attack(&pk.pub_param.q, &msg, &k, &sig);
         if is_dsa_key_pair(&pk, &guess)
             && hash_msg_to_hexstr(&guess.to_str_radix(16).as_bytes())
                 == String::from("0954edd5e0afe5542a4adf012611a91912a3ec16")

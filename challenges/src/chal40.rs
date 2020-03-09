@@ -1,4 +1,4 @@
-use super::chal39::mod_inv;
+use super::mod_inv;
 use num::BigUint;
 
 // returns the solution x to the

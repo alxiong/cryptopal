@@ -2,7 +2,7 @@
 #![allow(dead_code, non_snake_case)]
 #![feature(proc_macro_hygiene, decl_macro)]
 
-use num::BigUint;
+use num::{bigint::Sign, BigInt, BigUint, One, Zero};
 use rand::{self, RngCore};
 
 pub mod chal18;
@@ -16,6 +16,7 @@ pub mod chal36;
 pub mod chal38;
 pub mod chal39;
 pub mod chal40;
+pub mod chal43;
 
 pub fn random_bytes(size: u32) -> Vec<u8> {
     let mut bytes = vec![0 as u8; size as usize];
@@ -41,4 +42,55 @@ pub trait SrpClient {
     /// perform kex upon receiving server side ephemeral (salt, B = kv + g^b)
     /// outputs HMAC tag for verification
     fn kex(&mut self, salt: &[u8], B: &BigUint) -> Vec<u8>;
+}
+
+#[allow(clippy::many_single_char_names)]
+pub fn mod_inv(a: &BigUint, n: &BigUint) -> Option<BigUint> {
+    let mut t = BigInt::zero();
+    let mut new_t = BigInt::one();
+    let mut r = BigInt::from_biguint(Sign::Plus, n.clone());
+    let mut new_r = BigInt::from_biguint(Sign::Plus, a.clone());
+
+    fn t_transition(t: &mut BigInt, new_t: &mut BigInt, q: &BigInt) {
+        let new_t_val = t.clone() - q * new_t.clone();
+        *t = new_t.clone();
+        *new_t = new_t_val;
+    }
+    fn r_transition(r: &mut BigInt, new_r: &mut BigInt, q: &BigInt) {
+        let new_r_val = r.clone() - q * new_r.clone();
+        *r = new_r.clone();
+        *new_r = new_r_val;
+    }
+    while new_r != BigInt::zero() {
+        let q = &r / &new_r;
+        t_transition(&mut t, &mut new_t, &q);
+        r_transition(&mut r, &mut new_r, &q);
+    }
+
+    if r > BigInt::one() {
+        // gcd(a, n) != 1, not invertible
+        return None;
+    }
+
+    if t < BigInt::zero() {
+        t += BigInt::from_biguint(Sign::Plus, n.clone());
+    }
+
+    Some(t.to_biguint().unwrap())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_modinv() {
+        assert_eq!(
+            mod_inv(
+                &BigUint::parse_bytes(b"17", 10).unwrap(),
+                &BigUint::parse_bytes(b"3120", 10).unwrap()
+            )
+            .unwrap(),
+            BigUint::parse_bytes(b"2753", 10).unwrap()
+        );
+    }
 }

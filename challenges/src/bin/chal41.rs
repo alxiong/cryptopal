@@ -1,4 +1,4 @@
-use challenges::chal39::{mod_inv, KeyPair};
+use challenges::{chal39::KeyPair, mod_inv};
 use num::{bigint::RandBigInt, BigUint, One};
 
 fn main() {

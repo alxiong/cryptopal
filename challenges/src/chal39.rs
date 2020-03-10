@@ -1,7 +1,7 @@
 #![allow(clippy::many_single_char_names)]
 use super::mod_inv;
 use lazy_static::lazy_static;
-use num::{BigUint, One};
+use num::{bigint::RandBigInt, BigUint, Integer, One};
 use rand::seq;
 use regex::bytes::Regex;
 use ring::der;
@@ -108,25 +108,25 @@ fn rand_two_primes() -> (BigUint, BigUint) {
     (primes[0].to_owned(), primes[1].to_owned())
 }
 
-#[derive(Debug)]
-pub struct KeyPair {
-    pub pubKey: PubKey,
-    pub priKey: PriKey,
+#[derive(Debug, Clone)]
+pub struct RsaKeyPair {
+    pub pubKey: RsaPubKey,
+    pub priKey: RsaPriKey,
 }
 
 #[derive(Debug, Clone)]
-pub struct PubKey {
+pub struct RsaPubKey {
     pub e: BigUint,
     pub n: BigUint,
 }
 
-#[derive(Debug)]
-pub struct PriKey {
+#[derive(Debug, Clone)]
+pub struct RsaPriKey {
     d: BigUint,
     n: BigUint,
 }
 
-impl Default for KeyPair {
+impl Default for RsaKeyPair {
     fn default() -> Self {
         let (p, q) = rand_two_primes();
         let n = &p * &q;
@@ -135,14 +135,14 @@ impl Default for KeyPair {
         let e = BigUint::parse_bytes(b"3", 10).unwrap(); // PubKey
         let d = mod_inv(&e, &phi_n).expect("should be able to derive private key");
 
-        KeyPair {
-            pubKey: PubKey { e, n: n.clone() },
-            priKey: PriKey { d, n },
+        RsaKeyPair {
+            pubKey: RsaPubKey { e, n: n.clone() },
+            priKey: RsaPriKey { d, n },
         }
     }
 }
 
-impl KeyPair {
+impl RsaKeyPair {
     /// generate certain number of key pairs
     /// currently only support <= 4 pairs
     pub fn gen(pairs: usize) -> Vec<Self> {
@@ -156,16 +156,52 @@ impl KeyPair {
             let e = BigUint::parse_bytes(b"3", 10).unwrap(); // PubKey
             let d = mod_inv(&e, &phi_n).expect("should be able to derive private key");
 
-            key_pairs.push(KeyPair {
-                pubKey: PubKey { e, n: n.clone() },
-                priKey: PriKey { d, n },
+            key_pairs.push(RsaKeyPair {
+                pubKey: RsaPubKey { e, n: n.clone() },
+                priKey: RsaPriKey { d, n },
             });
         }
         key_pairs
     }
+
+    /// this is determinsitic, one time use only
+    pub fn new_1024_rsa() -> Self {
+        // openssl prime -generate -bits 64 -hex
+        // parameters for faster testing
+        // let p = BigUint::parse_bytes(b"C2F25585EC182537", 16).unwrap();
+        // let q = BigUint::parse_bytes(b"DBCF88A5367DC841", 16).unwrap();
+
+        let q = BigUint::parse_bytes(
+            b"D59A80647781445E695BD1BF901F472BE01302929A89FF91B579777C4F61DA79\
+              EE05C556D0F70985D4A018FE03B196DB3B2C70B7647D28BE97971552FC8837CB",
+            16,
+        )
+        .unwrap();
+        let p = BigUint::parse_bytes(
+            b"F91D45F2953C94822066AD81044407A5B2B5A8EA6E16E0376116AEF16C1DCC39\
+              AF5C13A75A776394C35C86443A8ECD569C4CE31913E9E05A38ACA677C079DD9D",
+            16,
+        )
+        .unwrap();
+        let n = &p * &q;
+        let phi_n = (p - BigUint::one()) * (q - BigUint::one());
+
+        let mut rng = rand::thread_rng();
+        let mut e = BigUint::one();
+        let mut d = None;
+        while d.is_none() {
+            e = rng.gen_biguint_below(&phi_n);
+            d = mod_inv(&e, &phi_n);
+        }
+
+        RsaKeyPair {
+            pubKey: RsaPubKey { e, n: n.clone() },
+            priKey: RsaPriKey { d: d.unwrap(), n },
+        }
+    }
 }
 
-impl PubKey {
+impl RsaPubKey {
     /// RSA encryption
     pub fn encrypt(&self, m: &BigUint) -> BigUint {
         m.modpow(&self.e, &self.n)
@@ -208,9 +244,15 @@ impl PubKey {
     }
 }
 
-impl PriKey {
+impl RsaPriKey {
+    /// decrypt RSA ciphertext
     pub fn decrypt(&self, c: &BigUint) -> BigUint {
         c.modpow(&self.d, &self.n)
+    }
+
+    /// an oracle that takes a ciphertext and returns whether the decryped plaintext is even
+    pub fn parity(&self, c: &BigUint) -> bool {
+        self.decrypt(&c).is_even()
     }
 }
 
@@ -220,7 +262,7 @@ mod tests {
 
     #[test]
     fn rsa_encrytpion() {
-        let key_pair = KeyPair::default();
+        let key_pair = RsaKeyPair::default();
         let m = BigUint::parse_bytes(b"42", 10).unwrap();
         let ct = key_pair.pubKey.encrypt(&m);
         assert_eq!(key_pair.priKey.decrypt(&ct), m);
@@ -242,8 +284,8 @@ mod tests {
         .concat();
         let sig3 = vec![0, 1, 255, 255, 255, 255, 255, 255, 255, 1];
 
-        assert_eq!(PubKey::unpad_sig(&sig1).unwrap(), vec![100 as u8; 20]);
-        assert_eq!(PubKey::unpad_sig(&sig2).unwrap(), vec![200 as u8; 20]);
-        assert_eq!(PubKey::unpad_sig(&sig3), None);
+        assert_eq!(RsaPubKey::unpad_sig(&sig1).unwrap(), vec![100 as u8; 20]);
+        assert_eq!(RsaPubKey::unpad_sig(&sig2).unwrap(), vec![200 as u8; 20]);
+        assert_eq!(RsaPubKey::unpad_sig(&sig3), None);
     }
 }

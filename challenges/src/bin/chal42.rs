@@ -1,4 +1,4 @@
-use challenges::chal39::{KeyPair, PubKey, SHA1_PKCS1_DIGESTINFO_PREFIX};
+use challenges::chal39::{RsaKeyPair, RsaPubKey, SHA1_PKCS1_DIGESTINFO_PREFIX};
 use num::pow::Pow;
 use num::{BigUint, One};
 use sha1::{Digest, Sha1};
@@ -8,14 +8,14 @@ fn main() {
     println!("🔓 Challenge 42");
 
     let msg = b"hi mom".to_vec();
-    let pk = KeyPair::default().pubKey;
+    let pk = RsaKeyPair::default().pubKey;
     let forged_sig = forgey_attack(&msg, &pk);
 
     assert!(pk.broken_sig_verify(&msg, &forged_sig));
     println!("Successfully forged a signature!");
 }
 
-fn forgey_attack(msg: &[u8], pk: &PubKey) -> Vec<u8> {
+fn forgey_attack(msg: &[u8], pk: &RsaPubKey) -> Vec<u8> {
     let mod_byte = pk.n.bits() / 8;
 
     let mut h = Sha1::default();

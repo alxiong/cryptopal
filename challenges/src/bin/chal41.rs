@@ -1,4 +1,4 @@
-use challenges::{chal39::KeyPair, mod_inv};
+use challenges::{chal39::RsaKeyPair, mod_inv};
 use num::{bigint::RandBigInt, BigUint, One};
 
 fn main() {
@@ -6,7 +6,7 @@ fn main() {
 
     let mut rng = rand::thread_rng();
     let m = rng.gen_biguint(16);
-    let key_pair = KeyPair::default();
+    let key_pair = RsaKeyPair::default();
     let n = key_pair.pubKey.n.clone();
 
     let c = key_pair.pubKey.encrypt(&m);

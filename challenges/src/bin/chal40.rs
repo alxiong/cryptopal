@@ -1,10 +1,10 @@
-use challenges::{chal39::KeyPair, chal40::three_moduli_crt};
+use challenges::{chal39::RsaKeyPair, chal40::three_moduli_crt};
 use num::{BigUint, FromPrimitive};
 
 fn main() {
     println!("🔓 Challenge 40");
     let m = BigUint::from_u64(42).unwrap();
-    let keys = KeyPair::gen(3);
+    let keys = RsaKeyPair::gen(3);
     let key0 = keys[0].pubKey.clone();
     let key1 = keys[1].pubKey.clone();
     let key2 = keys[2].pubKey.clone();

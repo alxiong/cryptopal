@@ -18,6 +18,7 @@ pub mod chal39;
 pub mod chal40;
 pub mod chal43;
 pub mod chal46;
+pub mod chal47;
 
 pub fn random_bytes(size: u32) -> Vec<u8> {
     let mut bytes = vec![0 as u8; size as usize];

@@ -183,7 +183,21 @@ impl RsaKeyPair {
             16,
         )
         .unwrap();
-        let n = &p * &q;
+
+        Self::rsa_core(&p, &q)
+    }
+
+    /// deterministic keygen, one time use only
+    pub fn new_256_rsa() -> Self {
+        // p, q are 128 bits
+        let q = BigUint::parse_bytes(b"DFD08A944B0DDB457C1E164D88FA8D73", 16).unwrap();
+        let p = BigUint::parse_bytes(b"E03069878F0B0F2E7A259665DE528DB5", 16).unwrap();
+
+        Self::rsa_core(&p, &q)
+    }
+
+    fn rsa_core(p: &BigUint, q: &BigUint) -> Self {
+        let n = p * q;
         let phi_n = (p - BigUint::one()) * (q - BigUint::one());
 
         let mut rng = rand::thread_rng();
@@ -253,6 +267,16 @@ impl RsaPriKey {
     /// an oracle that takes a ciphertext and returns whether the decryped plaintext is even
     pub fn parity(&self, c: &BigUint) -> bool {
         self.decrypt(&c).is_even()
+    }
+
+    // Bleichenbacher 98 oracle which returns true if the decrypted bytes start with 00 02
+    // which is the PKCS1.5 padding format
+    pub fn bb_oracle(&self, c: &BigUint) -> bool {
+        let pt = &self.decrypt(&c).to_bytes_be();
+        // since BigUint when converting to bytes will ignore any zero bytes in front,
+        // to verify the plaintext starts with 00 02, equivalently means that it starts with 02
+        // and with a byte length one less than that of n
+        pt[0] == 2 && pt.len() == self.n.bits() / 8 - 1
     }
 }
 

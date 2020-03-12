@@ -2,8 +2,8 @@ use challenges::chal39::RsaKeyPair;
 use challenges::chal48::{rsa_padding_oracle_attack, Oracle};
 
 fn main() {
-    println!("🔓 Challenge 47");
-    let rsa_keys = RsaKeyPair::new_256_rsa();
+    println!("🔓 Challenge 48");
+    let rsa_keys = RsaKeyPair::new_1024_rsa();
     let oracle = Oracle::new(&rsa_keys);
 
     let msg = b"kick it, CC".to_vec();

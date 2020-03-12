@@ -18,12 +18,26 @@ pub mod chal39;
 pub mod chal40;
 pub mod chal43;
 pub mod chal46;
-pub mod chal47;
+pub mod chal48;
 
 pub fn random_bytes(size: u32) -> Vec<u8> {
     let mut bytes = vec![0 as u8; size as usize];
     rand::thread_rng().fill_bytes(&mut bytes[..]);
     bytes
+}
+
+pub fn random_nonzero_bytes(size: u32) -> Vec<u8> {
+    let mut result = random_bytes(size);
+    result.iter_mut().for_each(|b| {
+        if *b == 0 as u8 {
+            let mut new_byte = 0;
+            while new_byte == 0 {
+                new_byte = rand::random::<u8>();
+            }
+            *b = new_byte;
+        }
+    });
+    result
 }
 
 pub fn random_bytes_array(arr: &mut [u8]) {

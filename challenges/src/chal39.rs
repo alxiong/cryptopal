@@ -1,5 +1,5 @@
 #![allow(clippy::many_single_char_names)]
-use super::mod_inv;
+use super::{mod_inv, random_nonzero_bytes};
 use lazy_static::lazy_static;
 use num::{bigint::RandBigInt, BigUint, Integer, One};
 use rand::seq;
@@ -219,6 +219,23 @@ impl RsaPubKey {
     /// RSA encryption
     pub fn encrypt(&self, m: &BigUint) -> BigUint {
         m.modpow(&self.e, &self.n)
+    }
+
+    /// returns the PKCS1.5 padded messgae
+    pub fn pkcs_pad(&self, msg: &[u8]) -> BigUint {
+        let n_bytes = self.n.bits() / 8;
+        if msg.len() > n_bytes - 11 {
+            panic!("Too long of a message than our naive code can support");
+        }
+        let padding_bytes = random_nonzero_bytes((n_bytes - 3 - msg.len()) as u32);
+        let padded_msg = [
+            b"\x00\x02".to_vec(),
+            padding_bytes,
+            b"\x00".to_vec(),
+            msg.to_vec(),
+        ]
+        .concat();
+        BigUint::from_bytes_be(&padded_msg)
     }
 
     /// unpad the PKCS1.5 padding on RSA Signature of the format: 00 01 ff ... ff 00 ASN.1 HASH

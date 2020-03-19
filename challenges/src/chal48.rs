@@ -1,6 +1,6 @@
 use super::chal39::{RsaKeyPair, RsaPubKey};
 use super::mod_inv;
-use num::{bigint::RandBigInt, pow::Pow, BigUint, FromPrimitive, One, Zero};
+use num::{pow::Pow, BigUint, FromPrimitive, One, Zero};
 use std::cmp;
 use std::fmt;
 use std::thread;
@@ -19,7 +19,6 @@ pub fn rsa_padding_oracle_attack(pk: &RsaPubKey, ct: &BigUint, oracle: &mut Orac
 
     println!("Bleichenbacher padding oracle attack ... (take many many minutes)");
     let n = &pk.n.clone();
-    let mut rng = rand::thread_rng();
     let mut M: Vec<Range> = vec![];
     let mut s_last = BigUint::zero();
     let mut s_new = BigUint::zero();
@@ -44,8 +43,9 @@ pub fn rsa_padding_oracle_attack(pk: &RsaPubKey, ct: &BigUint, oracle: &mut Orac
         if i == 1 {
             // step 2.a starting the search
             println!("\nExecuting 2.a");
-            while s_new == BigUint::zero() || !oracle.oracle_query(&(ct * pk.encrypt(&s_new))) {
-                s_new = rng.gen_biguint_range(&(n / B_triple), n);
+            s_new = div_ceil(&n, &B_triple);
+            while !oracle.oracle_query(&(ct * pk.encrypt(&s_new))) {
+                s_new += BigUint::one();
             }
         } else if M.len() > 1 {
             // step 2.b
@@ -61,10 +61,11 @@ pub fn rsa_padding_oracle_attack(pk: &RsaPubKey, ct: &BigUint, oracle: &mut Orac
             let b = &M[0].stop;
 
             // r_i >= 2 * (b * s_i-1 - B) / n
-            let r_min = two * (b * &s_last - B) / n;
+            let r_min = two * div_ceil(&(b * &s_last - B), &n);
             'outer: for r in Range::new(&r_min, n) {
                 let s_min = (B_double + &r * n) / b;
                 let s_max = (B_triple + &r * n) / a;
+                assert!(s_min <= s_max);
 
                 for s in Range::new(&s_min, &s_max) {
                     if oracle.oracle_query(&(ct * pk.encrypt(&s))) {
@@ -85,14 +86,14 @@ pub fn rsa_padding_oracle_attack(pk: &RsaPubKey, ct: &BigUint, oracle: &mut Orac
         M.into_iter().for_each(|interval| {
             let a = &interval.start;
             let b = &interval.stop;
-            let r_min = div_ceil(&(a * &s_new - B_triple_minus_one), n);
+            let r_min = (a * &s_new - B_triple_minus_one) / n;
             let r_max = (b * &s_new - B_double) / n;
 
             for r in Range::new(&r_min, &r_max) {
-                let range_candidate = Range {
-                    start: div_ceil(&(B_double + &r * n), &s_new),
-                    stop: (B_triple_minus_one + &r * n) / &s_new,
-                };
+                let range_candidate = Range::new(
+                    &div_ceil(&(B_double + &r * n), &s_new),
+                    &((B_triple_minus_one + &r * n) / &s_new),
+                );
 
                 if let Some(intersect) = range_candidate.intersect(&interval) {
                     M_new.push(intersect);
@@ -104,7 +105,7 @@ pub fn rsa_padding_oracle_attack(pk: &RsaPubKey, ct: &BigUint, oracle: &mut Orac
             }
         });
         M = M_new;
-        println!("M: {:?}", M);
+        println!("M: {:#?}", M);
         // =================
 
         // Step 4: Terminate or Repeat (back to step 2)
@@ -143,6 +144,7 @@ impl Oracle {
     }
 }
 
+#[derive(Clone, PartialEq)]
 // inclusive range [start, stop]
 struct Range {
     pub start: BigUint,
@@ -199,5 +201,46 @@ fn div_ceil(num: &BigUint, dem: &BigUint) -> BigUint {
         num / dem + BigUint::one()
     } else {
         num / dem
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn range_intersect() {
+        let r1 = Range::new(&BigUint::one(), &BigUint::parse_bytes(b"10", 10).unwrap());
+        let r2 = Range::new(
+            &BigUint::parse_bytes(b"3", 10).unwrap(),
+            &BigUint::parse_bytes(b"7", 10).unwrap(),
+        );
+        assert_eq!(r1.intersect(&r2), Some(r2.clone()));
+        let r3 = Range::new(
+            &BigUint::parse_bytes(b"8", 10).unwrap(),
+            &BigUint::parse_bytes(b"15", 10).unwrap(),
+        );
+        assert_eq!(
+            r1.intersect(&r3),
+            Some(Range::new(
+                &BigUint::parse_bytes(b"8", 10).unwrap(),
+                &BigUint::parse_bytes(b"10", 10).unwrap(),
+            ))
+        );
+        let r4 = Range::new(
+            &BigUint::parse_bytes(b"12", 10).unwrap(),
+            &BigUint::parse_bytes(b"20", 10).unwrap(),
+        );
+        assert_eq!(r1.intersect(&r4), None);
+        let r5 = Range::new(
+            &BigUint::parse_bytes(b"10", 10).unwrap(),
+            &BigUint::parse_bytes(b"10", 10).unwrap(),
+        );
+        assert_eq!(
+            r1.intersect(&r5),
+            Some(Range::new(
+                &BigUint::parse_bytes(b"10", 10).unwrap(),
+                &BigUint::parse_bytes(b"10", 10).unwrap(),
+            ))
+        );
     }
 }

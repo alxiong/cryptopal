@@ -3,6 +3,7 @@ use challenges::chal48::{rsa_padding_oracle_attack, Oracle};
 
 fn main() {
     println!("🔓 Challenge 48");
+    // NOTE: this runs for 40 minutes on my laptop, so be patient.
     let rsa_keys = RsaKeyPair::new_1024_rsa();
     let mut oracle = Oracle::new(&rsa_keys);
 

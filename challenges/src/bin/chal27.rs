@@ -1,6 +1,5 @@
 use challenges::random_bytes;
 use cipher::{cbc::AES_128_CBC, Cipher};
-use std::convert::TryInto;
 
 fn main() {
     println!("🔓 Challenge 27");
@@ -48,14 +47,14 @@ impl Key {
         }
 
         // NOTE: this is where we feed key into CBC as its iv
-        let cbc_cipher = AES_128_CBC::from_iv(self.0.as_slice().try_into().unwrap());
+        let cbc_cipher = AES_128_CBC::from_iv(&self.0);
 
         cbc_cipher.encrypt(&self.0, &cleaned_input)
     }
 
     // returns true (which pass the admin=true test) or Error with invalid plaintext `Vec<u8>`
     pub fn decryption_oracle(&self, ct: &[u8]) -> Result<bool, Vec<u8>> {
-        let cbc_cipher = AES_128_CBC::from_iv(self.0.as_slice().try_into().unwrap());
+        let cbc_cipher = AES_128_CBC::from_iv(&self.0);
         let pt = cbc_cipher.decrypt(&self.0, ct);
         if String::from_utf8(pt.clone()).is_err() {
             return Err(pt);

@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 use super::{from_blocks, into_blocks, padding, random_bytes_array, Cipher};
 use openssl::symm::{Cipher as SslCipher, Crypter as SslCrypter, Mode};
+use std::convert::TryInto;
 
 #[allow(non_camel_case_types)]
 #[derive(Default)]
@@ -16,8 +17,13 @@ impl AES_128_CBC {
         AES_128_CBC { iv }
     }
 
-    pub fn from_iv(iv: [u8; 16]) -> AES_128_CBC {
-        AES_128_CBC { iv }
+    pub fn from_iv(iv: &[u8]) -> AES_128_CBC {
+        if iv.len() != 16 {
+            panic!("Invalid iv value, should be a [u8; 16]");
+        }
+        AES_128_CBC {
+            iv: iv.try_into().unwrap(),
+        }
     }
 
     /// Validate whether `blocks` is truncated into a list of 128-bit(16-byte) block.
@@ -55,8 +61,7 @@ impl AES_128_CBC {
         // CBC decrypt
         let mut pt: Vec<Vec<u8>> = vec![Vec::new(); ct_blocks.len()];
         let mut last = &iv_ct_blocks[0];
-        let mut decrypter =
-            SslCrypter::new(SslCipher::aes_128_ecb(), Mode::Decrypt, key, None).unwrap();
+        let mut decrypter = SslCrypter::new(SslCipher::aes_128_ecb(), Mode::Decrypt, key, None).unwrap();
         decrypter.pad(false); // disable padding from aes_128_ecb
 
         for i in 0..(*ct_blocks).len() {
@@ -83,8 +88,7 @@ impl Cipher for AES_128_CBC {
 
         let mut ct: Vec<Vec<u8>> = vec![Vec::new(); msg_block.len()];
         let mut last: Vec<u8> = self.iv.to_vec();
-        let mut encrypter =
-            SslCrypter::new(SslCipher::aes_128_ecb(), Mode::Encrypt, key, None).unwrap();
+        let mut encrypter = SslCrypter::new(SslCipher::aes_128_ecb(), Mode::Encrypt, key, None).unwrap();
         encrypter.pad(false); // disable padding from ECB encryption, only use it as a pure AES Encryption
 
         // CBC encrypt

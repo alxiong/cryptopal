@@ -172,7 +172,7 @@ dependencies = [
  "encoding",
  "flate2",
  "hmac",
- "hyper 0.14.10",
+ "hyper 0.14.12",
  "lazy_static",
  "md4",
  "num",
@@ -549,9 +549,9 @@ dependencies = [
 
 [[package]]
 name = "hyper"
-version = "0.14.10"
+version = "0.14.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7728a72c4c7d72665fde02204bcbd93b247721025b222ef78606f14513e0fd03"
+checksum = "13f67199e765030fa08fe0bd581af683f0d5bc04ea09c2b1102012c5fb90e7fd"
 dependencies = [
  "bytes 1.1.0",
  "futures-channel",

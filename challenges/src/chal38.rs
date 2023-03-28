@@ -1,9 +1,9 @@
 use super::random_bytes;
-use bytes::buf::BufExt;
+use bytes::Buf;
 use dh::{mod_p::Dh, DH};
 use encoding::hex;
 use hmac::{Hmac, Mac};
-use hyper::{Body, Client, Method, Request, Uri};
+use hyper::{Body, client::Client, Method, Request, Uri};
 use num::{bigint::RandBigInt, BigUint};
 use rocket::{self, get, post, routes};
 use rocket::{

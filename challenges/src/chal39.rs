@@ -2,9 +2,9 @@
 use super::{mod_inv, random_nonzero_bytes};
 use lazy_static::lazy_static;
 use num::{bigint::RandBigInt, BigUint, Integer, One};
-use rand::seq;
+use rand::seq::SliceRandom;
 use regex::bytes::Regex;
-use ring::der;
+use ring::io::der;
 use sha1::{Digest, Sha1};
 
 // generating prime is hard, borrow existing prime from @rozbb
@@ -101,8 +101,7 @@ pkcs1_digestinfo_prefix!(
 
 fn rand_two_primes() -> (BigUint, BigUint) {
     let mut rng = rand::thread_rng();
-    let primes: Vec<BigUint> = seq::sample_slice(&mut rng, PRIMES, 2)
-        .iter()
+    let primes: Vec<BigUint> = PRIMES.choose_multiple(&mut rng, 2)
         .map(|&s| BigUint::parse_bytes(&s.to_vec(), 16).unwrap())
         .collect();
     (primes[0].to_owned(), primes[1].to_owned())
@@ -223,7 +222,7 @@ impl RsaPubKey {
 
     /// returns the PKCS1.5 padded messgae
     pub fn pkcs_pad(&self, msg: &[u8]) -> BigUint {
-        let n_bytes = self.n.bits() / 8;
+        let n_bytes: usize = self.n.bits() as usize / 8;
         if msg.len() > n_bytes - 11 {
             panic!("Too long of a message than our naive code can support");
         }
@@ -293,7 +292,7 @@ impl RsaPriKey {
         // since BigUint when converting to bytes will ignore any zero bytes in front,
         // to verify the plaintext starts with 00 02, equivalently means that it starts with 02
         // and with a byte length one less than that of n
-        pt[0] == 2 && pt.len() == self.n.bits() / 8 - 1
+        pt[0] == 2 && pt.len() == self.n.bits() as usize / 8 - 1
     }
 }
 

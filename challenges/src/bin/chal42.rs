@@ -16,7 +16,7 @@ fn main() {
 }
 
 fn forgey_attack(msg: &[u8], pk: &RsaPubKey) -> Vec<u8> {
-    let mod_byte = pk.n.bits() / 8;
+    let mod_byte = pk.n.bits() as usize / 8;
 
     let mut h = Sha1::default();
     h.input(&msg);
@@ -48,11 +48,11 @@ fn forgey_attack(msg: &[u8], pk: &RsaPubKey) -> Vec<u8> {
 // return the next perfect cubic number between [a, b)
 fn next_cub(a: &BigUint, b: &BigUint) -> Option<BigUint> {
     let cbrt = a.cbrt();
-    match cbrt.pow(3 as u32).cmp(&a) {
+    match Pow::pow(&cbrt, 3 as u32).cmp(&a) {
         Ordering::Equal => Some(a.to_owned()),
         Ordering::Greater => panic!("should never happen"),
         Ordering::Less => {
-            let next = (cbrt + BigUint::one()).pow(3 as u32);
+            let next = Pow::pow(cbrt + BigUint::one(), 3 as u32);
             match next.cmp(&b) {
                 Ordering::Less => Some(next),
                 _ => None,

@@ -14,7 +14,7 @@ fn main() {
 fn delayed_rng() -> u32 {
     fn wait() {
         let mut rng = rand::thread_rng();
-        let rand_wait = Duration::from_secs(rng.gen_range(40, 1000));
+        let rand_wait = Duration::from_secs(rng.gen_range(40..1000));
         // use the following when testing
         // let rand_wait = Duration::from_secs(rng.gen_range(0, 3));
         thread::sleep(rand_wait);

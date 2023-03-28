@@ -1,6 +1,6 @@
 use super::chal39::{RsaKeyPair, RsaPubKey};
 use super::mod_inv;
-use num::{pow::Pow, BigUint, FromPrimitive, One, Zero};
+use num::{traits::Pow, BigUint, FromPrimitive, One, Zero};
 use std::cmp;
 use std::fmt;
 use std::thread;
@@ -25,7 +25,7 @@ pub fn rsa_padding_oracle_attack(pk: &RsaPubKey, ct: &BigUint, oracle: &mut Orac
     // B = 2 ^ (n - 16)
     let two = &BigUint::from_u32(2).unwrap();
     let three = &BigUint::from_u32(3).unwrap();
-    let B = &(two.pow(n.bits() - 16));
+    let B = &(Pow::pow(two, n.bits() - 16));
     let B_double = &(B * two);
     let B_triple = &(B * three);
     let B_triple_minus_one = &(B_triple - BigUint::one());

@@ -32,8 +32,8 @@ fn encryption_oracle(input: &[u8]) -> Vec<u8> {
 
     // prefix and suffix the input with random bytes (5~10 in length)
     let mut padded_input: Vec<u8> = vec![];
-    let prefix = random_bytes(rng.gen_range(5, 11));
-    let suffix = random_bytes(rng.gen_range(5, 11));
+    let prefix = random_bytes(rng.gen_range(5..11));
+    let suffix = random_bytes(rng.gen_range(5..11));
     padded_input.extend_from_slice(&prefix[..]);
     padded_input.extend_from_slice(&input[..]);
     padded_input.extend_from_slice(&suffix[..]);

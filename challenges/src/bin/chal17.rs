@@ -88,7 +88,7 @@ impl Key {
         let pt_candidates: Vec<_> = pt_str.lines().collect();
 
         let mut rng = rand::thread_rng();
-        let pt = pt_candidates[rng.gen_range(0, pt_candidates.len())];
+        let pt = pt_candidates[rng.gen_range(0..pt_candidates.len())];
 
         let cbc_cipher = AES_128_CBC::new();
         cbc_cipher.encrypt(&self.0, &pt.as_bytes())
